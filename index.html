@@ -11,14 +11,13 @@
    IDEA: the wall of letter cards in a Thai village learning centre
    PICTURE: one huge letter card that speaks, beside the full ก–ฮ board
    COLOUR and TYPE: white, royal blue band, sun yellow, primer red; K2D throughout
-   LAYOUT: blue header band with tabs, then each lesson as one working board */
-:root{color-scheme:light dark;--bg:light-dark(#ffffff,#10142a);--ink:light-dark(#14183a,#eef0ff);--blue:light-dark(#1f3fc4,#4a66f2);--sun:#ffc53d;--red:light-dark(#d9302a,#ff6a5f);--card:light-dark(#f2f4ff,#1a2044);--line:light-dark(#dce1f6,#2d3566);--muted:light-dark(#4b5274,#aab1d6);--ok:light-dark(#1f7a4a,#5fd39a)}
+   LAYOUT: navy app bar, hero + lesson cards on home, bottom tab bar like a phone app */
+:root{color-scheme:light dark;--bg:light-dark(#f6eedf,#0f1626);--ink:light-dark(#1b2236,#f3ead8);--blue:light-dark(#1c2b4f,#3d5591);--navy:#14213d;--navy2:#22335c;--sun:#e0b45a;--gold1:#f6dc94;--gold2:#c18a2c;--red:light-dark(#c0392b,#ff7a6b);--card:light-dark(#fffaf1,#18213a);--line:light-dark(#e6d6b8,#2e3a5c);--muted:light-dark(#6b5f4a,#b9ae98);--ok:light-dark(#1f7a4a,#5fd39a)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 K2D,system-ui,sans-serif;overflow-x:clip}
 .band{padding:clamp(22px,3.5vw,48px) max(5vw,16px)}
 .wrap{max-width:1240px;margin:0 auto}
-header{background:var(--blue);color:#fff;padding-bottom:0}
 h1,h2,h3{font-family:K2D,sans-serif;font-weight:600;line-height:1.1;margin:0;text-wrap:balance}
 h1{font-size:clamp(32px,5vw,50px)}
 h2{font-size:clamp(24px,3vw,32px);margin-bottom:6px}
@@ -26,10 +25,42 @@ h2{font-size:clamp(24px,3vw,32px);margin-bottom:6px}
 .top{display:flex;flex-wrap:wrap;gap:16px;align-items:end;justify-content:space-between}
 .speed{display:flex;align-items:center;gap:8px;font-size:15px}
 .speed select{font:inherit;font-size:16px;border-radius:10px;border:0;padding:8px 10px;min-height:44px}
-nav{display:flex;gap:4px;overflow-x:auto;margin-top:8px;scrollbar-width:none}
-nav a{flex:none;color:#fff;text-decoration:none;font-family:K2D,sans-serif;font-weight:500;padding:12px 18px;border-radius:14px 14px 0 0;min-height:44px}
-nav a[aria-current=page]{background:var(--bg);color:var(--blue)}
-nav a:focus-visible,button:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+a:focus-visible,button:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+.pattern{background-color:var(--navy);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Cpath d='M14 2l12 12-12 12L2 14z' fill='none' stroke='%23e0b45a' stroke-opacity='.13'/%3E%3Ccircle cx='14' cy='14' r='2' fill='%23e0b45a' fill-opacity='.12'/%3E%3C/svg%3E")}
+.appbar{position:sticky;top:0;z-index:20;display:grid;grid-template-columns:48px minmax(0,1fr) auto;align-items:center;gap:8px;padding:8px max(4vw,12px);color:#fff;border-bottom:2px solid var(--gold2)}
+.ib{width:44px;height:44px;border-radius:50%;border:1px solid rgba(246,220,148,.5);background:rgba(255,255,255,.06);color:var(--gold1);display:grid;place-items:center;font-size:26px;line-height:1}
+.ib[hidden]{display:grid!important;visibility:hidden}
+.abt{font-weight:800;font-size:20px;letter-spacing:.2px;background:linear-gradient(180deg,var(--gold1),var(--sun) 60%,var(--gold2));-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.speed{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--gold1)}
+.speed select{font:inherit;font-size:16px;border-radius:999px;border:1px solid rgba(246,220,148,.6);background:var(--navy2);color:#fff;padding:6px 10px;min-height:40px}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:light-dark(#fffaf1,#141c31);border-top:1px solid var(--line);padding:6px max(2vw,6px,calc((100% - 680px)/2)) calc(6px + env(safe-area-inset-bottom));box-shadow:0 -6px 18px rgba(20,33,61,.12)}
+.tabbar a{display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:var(--muted);font-size:13px;font-weight:600;padding:4px 0;min-height:52px;border-radius:12px;position:relative}
+.tabbar svg{width:26px;height:26px}
+.tabbar a[aria-current=page]{color:light-dark(var(--navy),var(--gold1))}
+.tabbar a[aria-current=page]::before{content:"";position:absolute;top:-7px;left:25%;right:25%;height:3px;border-radius:3px;background:var(--gold2)}
+.homecol{max-width:680px;margin:0 auto}
+.hhero{position:relative;color:#fff;text-align:center;padding:26px 16px 0;margin:calc(-1*clamp(22px,3.5vw,48px)) calc(-1*max(5vw,16px)) 0;overflow:hidden}
+.hhero .en{margin:0;font-weight:700;font-size:clamp(16px,3.4vw,22px);letter-spacing:.06em;color:var(--gold1)}
+.hhero h1{font-size:clamp(30px,6.4vw,44px);font-weight:800;margin:2px 0 12px;background:linear-gradient(180deg,#fff3c9,var(--gold1) 45%,var(--sun) 70%,var(--gold2));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 rgba(0,0,0,.35))}
+.hhero .art{display:block;width:min(680px,100%);margin:0 auto;aspect-ratio:848/508;object-fit:cover;-webkit-mask-image:linear-gradient(transparent,#000 14%,#000 86%,transparent),linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);-webkit-mask-composite:source-in;mask-image:linear-gradient(transparent,#000 14%,#000 86%,transparent),linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-composite:intersect}
+.cta{position:relative;z-index:2;display:inline-flex;flex-direction:column;align-items:center;margin:-46px auto 0;padding:12px 44px 10px;border-radius:999px;text-decoration:none;color:#3a2606;background:linear-gradient(180deg,#fff0bd,var(--gold1) 35%,var(--sun) 70%,var(--gold2));border:2px solid #fff3c9;box-shadow:0 8px 0 -2px #8a5d17,0 14px 26px rgba(0,0,0,.35)}
+.cta b{font-size:clamp(22px,5vw,28px);line-height:1.2}
+.cta small{margin-top:4px;background:var(--navy);color:var(--gold1);font-size:12px;letter-spacing:.08em;border-radius:999px;padding:1px 14px}
+.cta:active{transform:translateY(3px)}
+.panel{background:var(--bg);border-radius:50% 50% 0 0/34px 34px 0 0;margin:26px calc(-1*max(5vw,16px)) 0;padding:26px max(5vw,16px) 0;position:relative;top:0}
+.lessons{display:grid;gap:12px;max-width:680px;margin:0 auto}
+.lesson{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:14px;align-items:center;text-decoration:none;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:18px;padding:10px 14px 10px 10px;box-shadow:0 3px 0 light-dark(#e9dcc2,#0b1120)}
+.lesson .ic{width:64px;height:64px;border-radius:14px;overflow:hidden;border:2px solid var(--gold2);background:var(--navy);display:grid;place-items:center;box-shadow:inset 0 0 0 2px var(--navy)}
+.lesson .ic img{width:100%;height:100%;object-fit:cover}.lesson .ic.e img{width:62%;height:62%;object-fit:contain}
+.lesson .en{display:block;font-size:13px;letter-spacing:.05em;color:var(--muted);font-weight:600}
+.lesson .th{display:block;font-size:19px;font-weight:700;line-height:1.3}
+.lesson .pg{display:block;font-size:13px;color:var(--ok)}
+.lesson .chev{font-size:26px;color:var(--gold2)}
+.lesson:hover{border-color:var(--gold2)}
+.prow{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px}
+.prow .bar{height:10px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:6px}.prow .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--sun),var(--gold2))}
+.prow b{font-size:18px}.prow span{float:right;color:var(--muted)}
 .lead{color:var(--muted);margin:0 0 18px}
 button{font:inherit;cursor:pointer;color:inherit}
 .btn{background:var(--blue);color:#fff;border:0;border-radius:12px;padding:10px 18px;min-height:44px;font-family:K2D,sans-serif;font-weight:500}
@@ -128,30 +159,48 @@ footer{border-top:1px solid var(--line);color:var(--muted);font-size:15px;text-a
 </style>
 </head>
 <body>
-<header class="band">
-  <div class="wrap">
-    <div class="top">
-      <div>
-        <h1>รู้หนังสือไทย</h1>
-        <p class="sub">ฝึกพยัญชนะ สระ วรรณยุกต์ ผสมคำ และอ่านประโยคง่าย ๆ แตะที่ตัวอักษรหรือคำเพื่อฟังเสียงอ่าน</p>
-      </div>
-      <label class="speed">ความเร็วเสียง
-        <select id="rate"><option value="0.8">ช้า</option><option value="1" selected>ปกติ</option><option value="1.15">เร็ว</option></select>
-      </label>
-    </div>
-    <nav id="nav" aria-label="บทเรียน">
-      <a href="#home">หน้าแรก</a><a href="#consonants">พยัญชนะ</a><a href="#vowels">สระ</a><a href="#tones">วรรณยุกต์</a><a href="#mix">ผสมคำ</a><a href="#days">วันและเดือน</a><a href="#words">คำศัพท์</a><a href="#read">ฝึกอ่าน</a><a href="#quiz">แบบทดสอบ</a>
-    </nav>
-  </div>
+<header class="appbar pattern">
+  <button class="ib" id="back" aria-label="กลับหน้าแรก" hidden>‹</button>
+  <div class="abt" id="abTitle">รู้ภาษาไทย</div>
+  <label class="speed"><span>เสียง</span>
+    <select id="rate" aria-label="ความเร็วเสียง"><option value="0.8">ช้า</option><option value="1" selected>ปกติ</option><option value="1.15">เร็ว</option></select>
+  </label>
 </header>
+<nav id="nav" class="tabbar" aria-label="เมนูหลัก">
+  <a href="#home"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 2 11h3v9h5v-6h4v6h5v-9h3z"/></svg>หน้าแรก</a>
+  <a href="#library"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h3v16H4zM8.5 4h3v16h-3zM13 5.2l2.9-.8 4.1 15.4-2.9.8z"/></svg>ห้องสมุด</a>
+  <a href="#progress"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 20h3v-6H4zm6.5 0h3V9h-3zM17 20h3V4h-3z"/></svg>ความก้าวหน้า</a>
+  <a href="#quiz"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-1.2 14.6-4.3-4.3 1.6-1.6 2.7 2.7 5.6-5.6 1.6 1.6z"/></svg>แบบทดสอบ</a>
+</nav>
 
 <main class="band"><div class="wrap">
   <p class="warn" id="nov" hidden></p>
 
   <section id="v-home">
+    <div class="hhero pattern">
+      <p class="en">PROMOTE THAI LITERACY</p>
+      <h1>ส่งเสริมการรู้ภาษาไทย</h1>
+      <img class="art" src="covers/hero.jpg" alt="ภาพประกอบ ศาลาไทย หนังสือ และตัวอักษรไทย">
+    </div>
+    <div style="text-align:center"><a class="cta" id="cta" href="#consonants"><b>เริ่มต้นการเรียนรู้</b><small>START YOUR JOURNEY</small></a></div>
+    <div class="lessons" id="lessonList" style="margin-top:26px"></div>
+  </section>
+
+  <section id="v-library" hidden>
+    <h2>ห้องสมุดหนังสือ</h2>
+    <p class="lead">หนังสือและสื่อการเรียนรู้ แตะที่ปกเพื่อเปิด</p>
     <div class="shelf"><h2 class="shelfh">ตอนที่ ๑ บทนำ (การรู้จักภาษาไทย)</h2><div class="books" id="shelf1"></div></div>
     <div class="shelf"><h2 class="shelfh">ตอนที่ ๒ สภาพการเรียนรู้</h2><div class="books" id="shelf2"></div></div>
     <div class="shelf"><h2 class="shelfh">ตอนที่ ๓ ฝึกฝนและทดสอบ</h2><div class="books" id="shelf3"></div></div>
+  </section>
+
+  <section id="v-progress" hidden>
+    <div class="homecol">
+      <h2>ความก้าวหน้าของฉัน</h2>
+      <p class="lead">บันทึกไว้ในเครื่องนี้เท่านั้น</p>
+      <div id="progList"></div>
+      <button class="btn alt" id="progReset">ล้างความก้าวหน้า</button>
+    </div>
   </section>
 
   <section id="v-days" hidden>
@@ -527,11 +576,45 @@ $('#v-days').onclick=e=>{
   const go=j=>{clear();if(j>=bs.length)return;bs[j].classList.add('hl');speak(bs[j].dataset.say,()=>setTimeout(()=>go(j+1),200))};go(0);
 };
 
+/* ---------- home lessons, progress ---------- */
+const LESSONS=[["c01","LESSON 1: CONSONANTS","บทที่ 1: พยัญชนะไทย","consonants"],["c02","LESSON 2: VOWELS","บทที่ 2: สระภาษาไทย","vowels"],["c03","LESSON 3: TONE MARKS","บทที่ 3: วรรณยุกต์ไทย","tones"],["c04","LESSON 4: SPELLING","บทที่ 4: แบบฝึกประสมคำ","mix"],["c05","LESSON 5: DAYS & MONTHS","บทที่ 5: 7 วัน 12 เดือน","days"],["i:1f4d6","VOCABULARY","คำศัพท์ในชีวิตประจำวัน","words"],["i:1f4dd","BASIC READING","ฝึกอ่านประโยค","read"],["i:1f3af","QUIZ","แบบทดสอบ ฟังแล้วเลือก","quiz"],["c07","LIBRARY","ห้องสมุดหนังสือ ตอนที่ ๑–๓","library"]];
+const TITLES={home:'รู้ภาษาไทย',library:'ห้องสมุด',progress:'ความก้าวหน้า'};LESSONS.forEach(l=>{if(!TITLES[l[3]])TITLES[l[3]]=l[2].replace(/^บทที่ \d+: /,'')});
+const visited=new Set((()=>{try{return JSON.parse(localStorage.getItem('tl-visited')||'[]')}catch(e){return []}})());
+function lessonNote(v){
+  if(v==='consonants')return heard.size?`ฟังแล้ว ${heard.size}/44 ตัว`:'';
+  if(v==='quiz'){const t=[];if(best.letter!=null)t.push('พยัญชนะ '+best.letter+'/10');if(best.word!=null)t.push('คำศัพท์ '+best.word+'/10');return t.length?'ดีที่สุด: '+t.join(' · '):''}
+  return visited.has(v)?'เรียนแล้ว':'';
+}
+function renderHome(){
+  $('#lessonList').innerHTML=LESSONS.map(([img,en,th,v])=>{
+    const ic=img.startsWith('i:')?`<span class="ic e"><img src="img/${img.slice(2)}.svg" alt=""></span>`:`<span class="ic"><img src="covers/${img}.jpg" alt=""></span>`;
+    const n=lessonNote(v);
+    return `<a class="lesson" href="#${v}">${ic}<span><span class="en">${esc(en)}</span><span class="th">${esc(th)}</span>${n?`<span class="pg">✓ ${esc(n)}</span>`:''}</span><span class="chev" aria-hidden="true">›</span></a>`}).join('');
+  const next=LESSONS.slice(0,8).find(l=>!visited.has(l[3]));$('#cta').href='#'+(next?next[3]:'consonants');
+}
+function renderProgress(){
+  const rows=[['พยัญชนะที่ฟังแล้ว',heard.size,44]];
+  const done=LESSONS.slice(0,8).filter(l=>visited.has(l[3])).length;rows.push(['บทเรียนที่เข้าเรียนแล้ว',done,8]);
+  if(best.letter!=null)rows.push(['แบบทดสอบพยัญชนะ (คะแนนดีที่สุด)',best.letter,10]);
+  if(best.word!=null)rows.push(['แบบทดสอบคำศัพท์ (คะแนนดีที่สุด)',best.word,10]);
+  $('#progList').innerHTML=rows.map(([t,n,m])=>`<div class="prow"><b>${t}</b><span>${n}/${m}</span><div class="bar"><i style="width:${Math.round(n/m*100)}%"></i></div></div>`).join('');
+}
+let resetArm=false;
+$('#progReset').onclick=()=>{
+  if(!resetArm){resetArm=true;$('#progReset').textContent='กดอีกครั้งเพื่อยืนยันการล้าง';setTimeout(()=>{resetArm=false;$('#progReset').textContent='ล้างความก้าวหน้า'},4000);return}
+  try{['tl-heard','tl-best','tl-visited'].forEach(k=>localStorage.removeItem(k))}catch(e){}
+  heard.clear();visited.clear();delete best.letter;delete best.word;resetArm=false;$('#progReset').textContent='ล้างความก้าวหน้า';renderProgress();renderC();showBest();
+};
+$('#back').onclick=()=>{location.hash='#home'};
+
 /* ---------- routing ---------- */
-const views=['home','consonants','vowels','tones','mix','days','words','read','quiz'];let view='home';
+const views=['home','library','progress','consonants','vowels','tones','mix','days','words','read','quiz'];let view='home';
 function route(){
   const h=location.hash.slice(1);view=views.includes(h)?h:'home';
   views.forEach(v=>{$('#v-'+v).hidden=v!==view});
+  $('#abTitle').textContent=TITLES[view]||'รู้ภาษาไทย';$('#back').hidden=view==='home';
+  if(!['home','library','progress'].includes(view)&&!visited.has(view)){visited.add(view);try{localStorage.setItem('tl-visited',JSON.stringify([...visited]))}catch(e){}}
+  if(view==='home')renderHome();if(view==='progress')renderProgress();
   document.querySelectorAll('#nav a').forEach(a=>{if(a.getAttribute('href')==='#'+view)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   stop();window.scrollTo(0,0);
 }
