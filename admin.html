@@ -55,6 +55,15 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--sun);outline-of
 .timer{font-variant-numeric:tabular-nums;color:var(--red);font-weight:700;align-self:center}
 .rmsg{grid-column:1/-1;font-size:15px;margin:0}.rmsg.bad{color:var(--red)}.rmsg.good{color:var(--ok)}
 .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);max-width:min(92vw,640px);background:#14183a;color:#fff;border-radius:14px;padding:12px 18px;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:9;font-size:16px}.toast.bad{background:#b3261e}.toast.good{background:#1f7a4a}
+[hidden]{display:none!important}
+.cvgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.cvc{border:1px solid var(--line);border-radius:18px;padding:12px;display:grid;gap:8px;align-content:start}
+.cvc.wide{grid-column:1/-1}
+.cvc .pv{width:100%;aspect-ratio:1;border-radius:16px;overflow:hidden;background:#14307a;display:grid;place-items:center}
+.cvc.wide .pv{aspect-ratio:848/508;max-width:520px}
+.cvc .pv img{width:100%;height:100%;object-fit:cover}.cvc .pv img.icon{width:55%;height:55%;object-fit:contain}
+.cvc b{font-size:17px;line-height:1.3}
+.cvc .acts{justify-content:flex-start}
 .empty{color:var(--muted);text-align:center;padding:30px}
 footer{border-top:1px solid var(--line);color:var(--muted);font-size:15px;text-align:center}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
@@ -64,8 +73,8 @@ footer{border-top:1px solid var(--line);color:var(--muted);font-size:15px;text-a
 </head>
 <body>
 <header class="band"><div class="wrap">
-  <h1>ห้องครู · เสียงอ่าน</h1>
-  <p>อัดเสียงหรืออัปโหลดไฟล์เสียงคนอ่านจริง แทนเสียงสังเคราะห์ในแอป (เก็บใน Firebase) <a href="index.html">กลับไปหน้าผู้เรียน</a></p>
+  <h1>ห้องครู</h1>
+  <p>อัดเสียงคนอ่านจริง และเปลี่ยนภาพปกของแอป (เก็บใน Firebase) <a href="index.html">กลับไปหน้าผู้เรียน</a></p>
 </div></header>
 
 <main class="band"><div class="wrap">
@@ -82,6 +91,15 @@ footer{border-top:1px solid var(--line);color:var(--muted);font-size:15px;text-a
     <button class="btn alt" id="signout">ออกจากระบบ</button>
     <p class="msg" id="msg2" aria-live="polite"></p>
   </div>
+  <div class="tools" role="tablist" aria-label="ส่วนที่จัดการ" style="margin-bottom:18px">
+    <button class="chip" id="modeVoice" aria-pressed="true">เสียงอ่าน</button>
+    <button class="chip" id="modeCover" aria-pressed="false">ภาพปก</button>
+  </div>
+  <div id="coverUI" hidden>
+    <p class="hint" style="font-size:15px;margin:0 0 14px">เลือกภาพจากเครื่อง ระบบจะย่อและตัดภาพให้อัตโนมัติ (ปกเป็นสี่เหลี่ยมจัตุรัส ภาพหลักหน้าแรกเป็นแนวนอน) แล้วกด "บันทึก" ผู้เรียนจะเห็นปกใหม่เมื่อเปิดแอปครั้งถัดไป</p>
+    <div class="cvgrid" id="cvGrid"></div>
+  </div>
+  <div id="voiceUI">
   <div class="tools" id="groups"></div>
   <div class="tools">
     <input class="search" id="q" type="search" placeholder="ค้นหาคำ เช่น ไก่ หรือ สระอา">
@@ -90,9 +108,11 @@ footer{border-top:1px solid var(--line);color:var(--muted);font-size:15px;text-a
   </div>
   <div class="prog"><span id="progText"></span><div class="bar"><i id="progBar" style="width:0"></i></div></div>
   <div class="list" id="list"></div>
+  </div>
 </div></main>
 <footer class="band">สร้างสรรค์ โดย นายวนศาสตร์ วัฒนาสกุลลี</footer>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<input type="file" id="cvFile" accept="image/*" class="vh" tabindex="-1">
 <input type="file" id="file" accept="audio/*" class="vh" tabindex="-1">
 
 <script src="config.js"></script>
@@ -137,7 +157,7 @@ async function initFirebase(){
     authed=!!u;$('#login').hidden=authed;$('#who').hidden=!authed;
     $('#whoEmail').textContent=u?u.email:'';
     if(u)msg('อัดเสียงหรืออัปโหลดไฟล์ได้เลย','good');
-    render();
+    render();if(!$('#coverUI').hidden)renderCovers();
   });
   await loadIndex();
 }
@@ -268,6 +288,59 @@ $('#list').onclick=e=>{
   else if(a==='cancel'){URL.revokeObjectURL(pending[k].url);delete pending[k];delete rowMsg[k];render()}
   else if(a==='del')del(k);
 };
+/* ---------- covers ---------- */
+const CV=[["hero","ภาพหลักหน้าแรก","covers/hero.jpg",1],["basics","รู้จักภาษาไทยเบื้องต้น","img/1f4da.svg"],["consonants","บทที่ 1 พยัญชนะไทย","covers/c01.jpg"],["vowels","บทที่ 2 สระภาษาไทย","covers/c02.jpg"],["tones","บทที่ 3 วรรณยุกต์ไทย","covers/c03.jpg"],["mix","บทที่ 4 แบบฝึกประสมคำ","covers/c04.jpg"],["days","บทที่ 5 7 วัน 12 เดือน","covers/c05.jpg"],["words","คำศัพท์ในชีวิตประจำวัน","img/1f4d6.svg"],["read","ฝึกอ่านประโยค","img/1f4dd.svg"],["quiz","แบบทดสอบ","img/1f3af.svg"],["library","แบบเรียน 12 สภาพ (การ์ดหน้าแรก)","covers/c07.jpg"],
+  ...["เมืองไทยของเรา","ชีวิตของเรา","ภัยใกล้ตัว","การทำมาหากิน","สิ่งแวดล้อมยั่งยืน","ชุมชนเข้มแข็ง","กฎหมายน่ารู้","คุณธรรมนำสันติสุข","เปิดโลกเรียนรู้","เทคโนโลยีใกล้ตัว","พลังงาน","ท่องเที่ยวทั่วไทย"].map((t,i)=>["s"+(i+1),"สภาพที่ "+(i+1)+" "+t,"covers/c"+String(i+7).padStart(2,'0')+".jpg"])];
+const CVIDX={};const cvUrl={};const cvPending={};const cvMsg={};let cvBusy=null,cvKey=null,cvLoaded=false;
+async function loadCoverIndex(){
+  const {fs,db}=fb;const s=await fs.getDoc(fs.doc(db,'meta','covers'));
+  for(const k in CVIDX)delete CVIDX[k];Object.assign(CVIDX,(s.exists()&&s.data().keys)||{});
+  await Promise.all(Object.keys(CVIDX).map(k=>fs.getDoc(fs.doc(db,'covers',k)).then(d=>{if(d.exists())cvUrl[k]='data:'+(d.data().mime||'image/jpeg')+';base64,'+d.data().b64}).catch(()=>{})));
+  cvLoaded=true;renderCovers();
+}
+function shrink(file,wide){
+  return new Promise((res,rej)=>{const u=URL.createObjectURL(file);const im=new Image();
+    im.onload=()=>{const W=wide?1000:420,H=wide?Math.round(1000*508/848):420;const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+      const s=Math.max(W/im.width,H/im.height),w=im.width*s,h=im.height*s;x.fillStyle='#fff';x.fillRect(0,0,W,H);x.drawImage(im,(W-w)/2,(H-h)/2,w,h);URL.revokeObjectURL(u);
+      let q=.86,d=c.toDataURL('image/jpeg',q);while(d.length>900000&&q>.4){q-=.1;d=c.toDataURL('image/jpeg',q)}res(d)};
+    im.onerror=()=>{URL.revokeObjectURL(u);rej()};im.src=u});
+}
+function renderCovers(){
+  $('#cvGrid').innerHTML=CV.map(([k,label,def,wide])=>{
+    const p=cvPending[k],src=p||cvUrl[k]||def,icon=!p&&!cvUrl[k]&&def.endsWith('.svg');
+    const st=p?'<span class="st new">ยังไม่บันทึก</span>':cvUrl[k]?'<span class="st human">ภาพที่อัปโหลด</span>':'<span class="st synth">ภาพเดิม</span>';
+    const dis=authed?'':'disabled title="เข้าสู่ระบบก่อน"';
+    let acts;
+    if(cvBusy===k)acts='<span class="hint">กำลังบันทึก…</span>';
+    else{acts=`<button class="btn alt" data-c="pick" ${dis}>เลือกภาพ</button>`;
+      if(p)acts+=`<button class="btn sun" data-c="save" ${dis}>บันทึก</button><button class="btn alt" data-c="cancel">ยกเลิก</button>`;
+      else if(cvUrl[k]&&authed)acts+=`<button class="btn alt" data-c="reset">ใช้ภาพเดิม</button>`;}
+    const m=cvMsg[k]?`<p class="rmsg ${cvMsg[k].c}">${esc(cvMsg[k].t)}</p>`:'';
+    return `<div class="cvc${wide?' wide':''}" data-k="${k}"><div class="pv"><img${icon?' class="icon"':''} src="${esc(src)}" alt=""></div><b>${esc(label)}</b><div>${st}</div><div class="acts">${acts}</div>${m}</div>`}).join('');
+}
+$('#cvGrid').onclick=async e=>{
+  const b=e.target.closest('[data-c]');if(!b||b.disabled)return;const k=b.closest('[data-k]').dataset.k,a=b.dataset.c;
+  if(a==='pick'){cvKey=k;$('#cvFile').click();return}
+  if(a==='cancel'){delete cvPending[k];delete cvMsg[k];renderCovers();return}
+  const {fs,db}=fb;cvBusy=k;delete cvMsg[k];renderCovers();
+  try{
+    if(a==='save'){const d=cvPending[k],b64=d.split(',')[1],t=Date.now();
+      await withTimeout(fs.setDoc(fs.doc(db,'covers',k),{b64,mime:'image/jpeg',updated:t}),25000);
+      await withTimeout(fs.setDoc(fs.doc(db,'meta','covers'),{keys:{[k]:t}},{merge:true}),25000);
+      cvUrl[k]=d;CVIDX[k]=t;delete cvPending[k];cvMsg[k]={t:'บันทึกแล้ว',c:'good'};toast('บันทึกภาพปกแล้ว','good')}
+    if(a==='reset'){await withTimeout(fs.deleteDoc(fs.doc(db,'covers',k)),25000);
+      await withTimeout(fs.updateDoc(fs.doc(db,'meta','covers'),new fs.FieldPath('keys',k),fs.deleteField()),25000);
+      delete cvUrl[k];delete CVIDX[k];cvMsg[k]={t:'กลับไปใช้ภาพเดิมแล้ว',c:'good'}}
+  }catch(err){cvMsg[k]={t:'ไม่สำเร็จ: '+fbErr(err),c:'bad'};toast('บันทึกภาพไม่สำเร็จ: '+fbErr(err),'bad')}
+  cvBusy=null;renderCovers();
+};
+$('#cvFile').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f||!cvKey)return;
+  if(!/^image\//.test(f.type)){toast('เลือกได้เฉพาะไฟล์ภาพ','bad');return}
+  try{cvPending[cvKey]=await shrink(f,CV.find(c=>c[0]===cvKey)[3]);delete cvMsg[cvKey];renderCovers()}catch(err){toast('เปิดไฟล์ภาพนี้ไม่ได้ ลองไฟล์ .jpg หรือ .png','bad')}};
+function setMode(cover){$('#modeVoice').setAttribute('aria-pressed',String(!cover));$('#modeCover').setAttribute('aria-pressed',String(cover));$('#voiceUI').hidden=cover;$('#coverUI').hidden=!cover;
+  if(cover){renderCovers();if(!cvLoaded&&fb)loadCoverIndex().catch(err=>toast('โหลดภาพปกไม่ได้: '+fbErr(err),'bad'))}}
+$('#modeVoice').onclick=()=>setMode(false);$('#modeCover').onclick=()=>setMode(true);
+
 render();
 }
 

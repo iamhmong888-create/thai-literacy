@@ -159,12 +159,12 @@ footer{border-top:1px solid var(--line);color:var(--muted);font-size:15px;text-a
 
 /* ---- blue / white / red theme overrides ---- */
 .pattern{background-color:#14307a}
-.abt{background:linear-gradient(180deg,#fff6cf,#f6dc94 40%,#e0b45a 70%,#c18a2c);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.abt{line-height:1.5;padding-bottom:.1em;background:linear-gradient(180deg,#fff6cf,#f6dc94 40%,#e0b45a 70%,#c18a2c);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
 .speed{color:#fff}.speed select{background:#1f45a8;border-color:rgba(255,255,255,.55)}
 .appbar{border-bottom:4px solid var(--red);box-shadow:0 4px 0 #fff inset}
 .hhero{background-color:#14307a}
 .hhero .en{color:#f6dc94}
-.hhero h1{background:linear-gradient(180deg,#fff3c9,#f6dc94 45%,#e0b45a 70%,#c18a2c);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;filter:drop-shadow(0 3px 0 rgba(0,0,0,.35))}
+.hhero h1{line-height:1.45;padding-bottom:.12em;background:linear-gradient(180deg,#fff3c9,#f6dc94 45%,#e0b45a 70%,#c18a2c);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;filter:drop-shadow(0 3px 0 rgba(0,0,0,.35))}
 .cta{color:#fff;background:linear-gradient(180deg,#ff5a6c,#d7263d 55%,#a3142a);border:3px solid #fff;box-shadow:0 7px 0 -1px #7d0f20,0 14px 26px rgba(0,0,0,.3)}
 .cta small{background:#fff;color:#14307a}
 .btn.sun{background:var(--red);color:#fff}
@@ -211,7 +211,7 @@ footer{border-top:1px solid var(--line);color:var(--muted);font-size:15px;text-a
     <div class="hhero pattern">
       <p class="en">PROMOTE THAI LITERACY</p>
       <h1>ส่งเสริมการรู้ภาษาไทย</h1>
-      <img class="art" src="covers/hero.jpg" alt="ภาพประกอบ ศาลาไทย หนังสือ และตัวอักษรไทย">
+      <img class="art" id="heroImg" src="covers/hero.jpg" alt="ภาพประกอบ ศาลาไทย หนังสือ และตัวอักษรไทย">
     </div>
     <div style="text-align:center"><a class="cta" id="cta" href="#consonants"><b>เริ่มต้นการเรียนรู้</b><small>START YOUR JOURNEY</small></a></div>
     <div class="lessons" id="lessonList" style="margin-top:26px"></div>
@@ -226,11 +226,9 @@ footer{border-top:1px solid var(--line);color:var(--muted);font-size:15px;text-a
   </section>
 
   <section id="v-library" hidden>
-    <h2>ห้องสมุดหนังสือ</h2>
-    <p class="lead">หนังสือและสื่อการเรียนรู้ แตะที่ปกเพื่อเปิด</p>
-    <div class="shelf"><h2 class="shelfh">ตอนที่ ๑ บทนำ (การรู้จักภาษาไทย)</h2><div class="books" id="shelf1"></div></div>
-    <div class="shelf"><h2 class="shelfh">ตอนที่ ๒ สภาพการเรียนรู้</h2><div class="books" id="shelf2"></div></div>
-    <div class="shelf"><h2 class="shelfh">ตอนที่ ๓ ฝึกฝนและทดสอบ</h2><div class="books" id="shelf3"></div></div>
+    <h2>แบบเรียน 12 สภาพ</h2>
+    <p class="lead" style="margin-bottom:24px">สื่อประกอบการเรียน หลักสูตรการรู้หนังสือไทย แตะที่ปกเพื่อเปิด</p>
+    <div class="books" id="shelf2"></div>
   </section>
 
   <section id="v-progress" hidden>
@@ -336,7 +334,7 @@ footer{border-top:1px solid var(--line);color:var(--muted);font-size:15px;text-a
         </div>
       </div>
       <div class="qbox" id="qPlay" hidden>
-        <div class="row" style="justify-content:space-between"><span id="qNum"></span><button class="chip" id="qHintBtn">แสดงคำใบ้</button></div>
+        <div class="row" style="justify-content:space-between"><button class="chip" id="qExit">‹ ออก</button><span id="qNum"></span><button class="chip" id="qHintBtn">แสดงคำใบ้</button></div>
         <div class="meter"><i id="qBar" style="width:0"></i></div>
         <button class="btn sun" id="qSay" style="font-size:20px;padding:14px 28px">ฟังอีกครั้ง</button>
         <p id="qHint" hidden style="font-size:20px;margin:10px 0 0"></p>
@@ -346,7 +344,7 @@ footer{border-top:1px solid var(--line);color:var(--muted);font-size:15px;text-a
       <div class="qbox" id="qEnd" hidden>
         <div class="score" id="qScore"></div>
         <p id="qMsg"></p>
-        <button class="btn" id="qAgain">ทำอีกครั้ง</button>
+        <div class="row" style="justify-content:center"><button class="btn" id="qAgain">ทำอีกครั้ง</button><button class="btn alt" id="qMenu">เลือกแบบทดสอบอื่น</button></div>
       </div>
     </div>
   </section>
@@ -403,8 +401,17 @@ if(CFG.apiKey&&CFG.projectId){
   const SDK='https://www.gstatic.com/firebasejs/10.14.1/';
   Promise.all([import(SDK+'firebase-app.js'),import(SDK+'firebase-firestore.js')]).then(([app,fs])=>{
     fsx={fs,db:fs.getFirestore(app.initializeApp(CFG))};
+    fs.getDoc(fs.doc(fsx.db,'meta','covers')).then(s=>{if(s.exists())loadCovers(s.data().keys||{})}).catch(()=>{});
     return fs.getDoc(fs.doc(fsx.db,'meta','index'));
   }).then(s=>{if(s.exists())Object.assign(REC,s.data().keys||{})}).catch(()=>{});
+}
+/* teacher-uploaded covers (Firestore 'covers'), cached on the device */
+const COVER={};
+function loadCovers(keys){
+  Promise.all(Object.entries(keys).map(([k,u])=>idb.get('cover:'+k).then(c=>{
+    if(c&&c.u===u)return c;
+    return fsx.fs.getDoc(fsx.fs.doc(fsx.db,'covers',k)).then(s=>{if(!s.exists())return null;const d=s.data();const v={u:d.updated,b64:d.b64,mime:d.mime||'image/jpeg'};idb.set('cover:'+k,v);return v});
+  }).then(v=>{if(v)COVER[k]=b64url(v.b64,v.mime)}).catch(()=>{}))).then(()=>{if(window.__coversReady)window.__coversReady()});
 }
 /* unlock audio on the first touch (iOS) so recordings fetched later can still play */
 const SILENT='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
@@ -580,7 +587,11 @@ $('#qOpts').onclick=e=>{
   $('#qNext').hidden=false;$('#qNext').textContent=q.n===9?'ดูคะแนน':'ข้อต่อไป';$('#qNext').focus();
 };
 $('#qNext').onclick=()=>{q.n++;nextQ()};
-$('#qAgain').onclick=()=>{$('#qEnd').hidden=true;$('#qStart').hidden=false};
+function quizHome(){stop();$('#qPlay').hidden=true;$('#qEnd').hidden=true;$('#qStart').hidden=false;showBest()}
+const inQuiz=()=>!$('#qPlay').hidden||!$('#qEnd').hidden;
+$('#qAgain').onclick=()=>{q?startQ(q.mode):quizHome()};
+$('#qMenu').onclick=quizHome;$('#qExit').onclick=quizHome;
+document.querySelector('#nav a[href="#quiz"]').addEventListener('click',()=>{if(view==='quiz')quizHome()});
 
 /* ---------- home shelves ---------- */
 const LINKS=window.TL_BOOKS||{};
@@ -590,16 +601,15 @@ const TH='๐๑๒๓๔๕๖๗๘๙';const thn=n=>String(n).replace(/\d/g,d
 const SHELF2=ST.map((t,i)=>["c"+String(i+7).padStart(2,'0'),"สภาพที่ "+thn(i+1),t,"@s"+(i+1)]);
 const SHELF3=[["i:1f4d6","คำศัพท์","ในชีวิตประจำวัน","#words","#dbe4ff"],["i:1f4dd","ฝึกอ่าน","ประโยค","#read","#fff1c2"],["i:1f3af","แบบทดสอบ","ฟังแล้วเลือก","#quiz","#d8f5e3"]];
 function bookHTML([img,l1,l2,to,bg]){
+  const ck=to[0]==='@'?to.slice(1):to.slice(1);
   let href=to,ext=false,soon=false;
   if(to[0]==='@'){const u=LINKS[to.slice(1)];if(u&&/^https:\/\//.test(u)){href=u;ext=true}else{href='';soon=true}}
-  const cv=img.startsWith('i:')?`<span class="cv ico" style="background:${bg}"><img src="img/${img.slice(2)}.svg" alt=""></span>`:`<span class="cv"><img src="covers/${img}.jpg" alt="" loading="lazy">${soon?'<span class="soon">เร็ว ๆ นี้</span>':''}</span>`;
+  const cv=img.startsWith('i:')?`<span class="cv ico" style="background:${bg}"><img src="img/${img.slice(2)}.svg" alt=""></span>`:`<span class="cv"><img src="${COVER[ck]?esc(COVER[ck]):'covers/'+img+'.jpg'}" alt="" loading="lazy">${soon?'<span class="soon">เร็ว ๆ นี้</span>':''}</span>`;
   const inner=`${cv}<b>${esc(l1)}</b><span>${esc(l2)}</span>`;
   if(soon)return `<a class="book" role="link" aria-disabled="true" title="ยังไม่ได้ใส่ลิงก์หนังสือ (ไฟล์ books.js)">${inner}</a>`;
   return `<a class="book" href="${esc(href)}"${ext?' target="_blank" rel="noopener"':''}>${inner}</a>`;
 }
-$('#shelf1').innerHTML=SHELF1.map(bookHTML).join('');
-$('#shelf2').innerHTML=SHELF2.map(bookHTML).join('');
-$('#shelf3').innerHTML=SHELF3.map(bookHTML).join('');
+const renderShelf=()=>{$('#shelf2').innerHTML=SHELF2.map(bookHTML).join('')};renderShelf();
 
 /* ---------- days & months ---------- */
 const DAYS=[["อาทิตย์","#ff8a80"],["จันทร์","#ffe066"],["อังคาร","#ffb3dd"],["พุธ","#8fe3a8"],["พฤหัสบดี","#ffbf80"],["ศุกร์","#9fd3ff"],["เสาร์","#c9a7ff"]];
@@ -617,10 +627,10 @@ $('#v-days').onclick=e=>{
 
 /* ---------- home lessons, progress ---------- */
 const CHAPTERS=[["c01","LESSON 1: CONSONANTS","บทที่ 1: พยัญชนะไทย","consonants"],["c02","LESSON 2: VOWELS","บทที่ 2: สระภาษาไทย","vowels"],["c03","LESSON 3: TONE MARKS","บทที่ 3: วรรณยุกต์ไทย","tones"],["c04","LESSON 4: SPELLING","บทที่ 4: แบบฝึกประสมคำ","mix"],["c05","LESSON 5: DAYS & MONTHS","บทที่ 5: 7 วัน 12 เดือน","days"]];
-const LESSONS=[["basics","BASIC THAI · 5 CHAPTERS","รู้จักภาษาไทยเบื้องต้น","basics"],["i:1f4d6","VOCABULARY","คำศัพท์ในชีวิตประจำวัน","words"],["i:1f4dd","BASIC READING","ฝึกอ่านประโยค","read"],["i:1f3af","QUIZ","แบบทดสอบ ฟังแล้วเลือก","quiz"],["c07","LIBRARY","ห้องสมุดหนังสือ ตอนที่ ๑–๓","library"]];
+const LESSONS=[["i:1f4da","BASIC THAI · 5 CHAPTERS","รู้จักภาษาไทยเบื้องต้น","basics"],["i:1f4d6","VOCABULARY","คำศัพท์ในชีวิตประจำวัน","words"],["i:1f4dd","BASIC READING","ฝึกอ่านประโยค","read"],["i:1f3af","QUIZ","แบบทดสอบ ฟังแล้วเลือก","quiz"],["c07","12 LEARNING THEMES","แบบเรียน 12 สภาพ","library"]];
 const LEARN=[...CHAPTERS.map(c=>c[3]),'words','read','quiz'];
 const PARENT={};CHAPTERS.forEach(c=>PARENT[c[3]]='basics');
-const TITLES={home:'รู้หนังสือไทย',library:'ห้องสมุด',progress:'ความก้าวหน้า',basics:'รู้จักภาษาไทยเบื้องต้น',words:'คำศัพท์',read:'ฝึกอ่านประโยค',quiz:'แบบทดสอบ'};
+const TITLES={home:'รู้หนังสือไทย',library:'แบบเรียน 12 สภาพ',progress:'ความก้าวหน้า',basics:'รู้จักภาษาไทยเบื้องต้น',words:'คำศัพท์',read:'ฝึกอ่านประโยค',quiz:'แบบทดสอบ'};
 CHAPTERS.forEach(l=>{TITLES[l[3]]=l[2].replace(/^บทที่ \d+: /,'')});
 const visited=new Set((()=>{try{return JSON.parse(localStorage.getItem('tl-visited')||'[]')}catch(e){return []}})());
 function lessonNote(v){
@@ -630,7 +640,8 @@ function lessonNote(v){
   return visited.has(v)?'เรียนแล้ว':'';
 }
 function cardHTML([img,en,th,v]){
-  const ic=img==='quad'?`<span class="ic quad">${['c01','c02','c03','c04'].map(c=>`<img src="covers/${c}.jpg" alt="">`).join('')}</span>`:img.startsWith('i:')?`<span class="ic e"><img src="img/${img.slice(2)}.svg" alt=""></span>`:`<span class="ic"><img src="covers/${img}.jpg" alt=""></span>`;
+  if(COVER[v])img='u:'+COVER[v];
+  const ic=img.startsWith('u:')?`<span class="ic"><img src="${esc(img.slice(2))}" alt=""></span>`:img==='quad'?`<span class="ic quad">${['c01','c02','c03','c04'].map(c=>`<img src="covers/${c}.jpg" alt="">`).join('')}</span>`:img.startsWith('i:')?`<span class="ic e"><img src="img/${img.slice(2)}.svg" alt=""></span>`:`<span class="ic"><img src="covers/${img}.jpg" alt=""></span>`;
   const n=lessonNote(v);
   return `<a class="lesson" href="#${v}">${ic}<span><span class="en">${esc(en)}</span><span class="th">${esc(th)}</span>${n?`<span class="pg">✓ ${esc(n)}</span>`:''}</span><span class="chev" aria-hidden="true">›</span></a>`;
 }
@@ -653,7 +664,9 @@ $('#progReset').onclick=()=>{
   try{['tl-heard','tl-best','tl-visited'].forEach(k=>localStorage.removeItem(k))}catch(e){}
   heard.clear();visited.clear();delete best.letter;delete best.word;resetArm=false;$('#progReset').textContent='ล้างความก้าวหน้า';renderProgress();renderC();showBest();
 };
-$('#back').onclick=()=>{location.hash='#'+(PARENT[view]||'home')};
+$('#back').onclick=()=>{if(view==='quiz'&&inQuiz()){quizHome();return}location.hash='#'+(PARENT[view]||'home')};
+
+window.__coversReady=()=>{if(COVER.hero)$('#heroImg').src=COVER.hero;renderShelf();if(view==='home')renderHome();if(view==='basics')renderBasics()};
 
 /* ---------- routing ---------- */
 const views=['home','basics','library','progress','consonants','vowels','tones','mix','days','words','read','quiz'];let view='home';
@@ -662,7 +675,7 @@ function route(){
   views.forEach(v=>{$('#v-'+v).hidden=v!==view});
   $('#abTitle').textContent=TITLES[view]||'รู้หนังสือไทย';$('#back').setAttribute('aria-label',PARENT[view]?'กลับไปเล่มรู้จักภาษาไทยเบื้องต้น':'กลับหน้าแรก');$('#back').hidden=view==='home';
   if(!['home','basics','library','progress'].includes(view)&&!visited.has(view)){visited.add(view);try{localStorage.setItem('tl-visited',JSON.stringify([...visited]))}catch(e){}}
-  if(view==='home')renderHome();if(view==='basics')renderBasics();if(view==='progress')renderProgress();
+  if(view==='quiz')quizHome();if(view==='home')renderHome();if(view==='basics')renderBasics();if(view==='progress')renderProgress();
   const tab=['progress','quiz'].includes(view)?view:'home';document.querySelectorAll('#nav a').forEach(a=>{if(a.getAttribute('href')==='#'+tab)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   stop();window.scrollTo(0,0);
 }

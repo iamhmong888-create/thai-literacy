@@ -5,7 +5,7 @@ service cloud.firestore {
     // ใส่อีเมลครูที่อนุญาตให้อัปโหลด/ลบเสียงได้ (ใส่ได้หลายอีเมล คั่นด้วยจุลภาค)
     function isTeacher() {
       return request.auth != null
-        && request.auth.token.email in ['ใส่อีเมลครูตรงนี้@gmail.com'];
+        && request.auth.token.email in ['iamhmmong888@gmail.com'];
     }
 
     // เสียงอ่านแต่ละคำ: ทุกคนฟังได้ เฉพาะครูแก้ไขได้
@@ -15,7 +15,14 @@ service cloud.firestore {
         && (request.resource == null || request.resource.data.b64.size() < 1000000);
     }
 
-    // รายการคำที่มีเสียงคน
+    // ภาพปกที่ครูอัปโหลด: ทุกคนดูได้ เฉพาะครูแก้ไขได้
+    match /covers/{key} {
+      allow read: if true;
+      allow write: if isTeacher()
+        && (request.resource == null || request.resource.data.b64.size() < 1000000);
+    }
+
+    // รายการคำที่มีเสียงคน และรายการภาพปก
     match /meta/{doc} {
       allow read: if true;
       allow write: if isTeacher();
