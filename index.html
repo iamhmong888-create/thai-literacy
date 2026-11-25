@@ -341,7 +341,7 @@ const vT=(t,c)=>t.replace('_',c);
 const vTile=(t,k)=>`<button class="tile" data-v="${esc(t)}"><b>${vT(t,'อ')}</b><small>${vT(t,'ก')}</small><span class="k">${k}</span></button>`;
 $('#vPairs').innerHTML=VP.map(([s,l])=>`<div class="pair">${vTile(s,'เสียงสั้น')}${vTile(l,'เสียงยาว')}</div>`).join('');
 $('#vExtra').innerHTML=VX.map(t=>vTile(t,'สระเกิน')).join('')+['ฤ','ฤๅ','ฦ','ฦๅ'].map(t=>`<button class="tile" data-raw="${t}"><b>${t}</b><small>สระเกิน</small></button>`).join('');
-document.querySelector('#v-vowels').onclick=e=>{const b=e.target.closest('[data-v],[data-raw]');if(!b)return;stop();if(b.dataset.raw){speak(b.dataset.raw);return}const t=b.dataset.v;speak('สระ '+vT(t,'อ'),()=>speak(vT(t,'ก')))};
+document.querySelector('#v-vowels').onclick=e=>{const b=e.target.closest('[data-v],[data-raw]');if(!b)return;stop();if(b.dataset.raw){speak(b.dataset.raw);return}const t=b.dataset.v,nm='สระ '+vT(t,'อ'),ex=vT(t,'ก');speak(nm,()=>{if(!!REC[nm]===!!REC[ex])speak(ex)})};
 
 /* ---------- tones ---------- */
 const TM=[["่","ไม้เอก"],["้","ไม้โท"],["๊","ไม้ตรี"],["๋","ไม้จัตวา"]];
