@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ห้องครู · รู้หนังสือไทย</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=K2D:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: calm teacher's workbench
+   IDEA: a recording sheet — one line per word, record, listen, save
+   PICTURE: the list itself, with a live recording row
+   COLOUR and TYPE: same blue band, sun yellow and red as the learner app; K2D
+   LAYOUT: setup strip, group chips + search, then the recording list */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#10142a);--ink:light-dark(#14183a,#eef0ff);--blue:light-dark(#1f3fc4,#4a66f2);--sun:#ffc53d;--red:light-dark(#d9302a,#ff6a5f);--card:light-dark(#f2f4ff,#1a2044);--line:light-dark(#dce1f6,#2d3566);--muted:light-dark(#4b5274,#aab1d6);--ok:light-dark(#1f7a4a,#5fd39a)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 K2D,system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(20px,3vw,40px) max(5vw,16px)}
+.wrap{max-width:1100px;margin:0 auto}
+header{background:var(--blue);color:#fff}
+h1,h2{font-weight:700;line-height:1.1;margin:0}
+h1{font-size:clamp(30px,4.5vw,44px)}
+h2{font-size:22px;margin-bottom:8px}
+header p{margin:6px 0 0;opacity:.92}
+header a{color:#fff}
+button,input{font:inherit;color:inherit}
+.btn{background:var(--blue);color:#fff;border:0;border-radius:12px;padding:8px 16px;min-height:44px;font-weight:600;cursor:pointer;white-space:nowrap}
+.btn.alt{background:var(--bg);color:var(--ink);border:1px solid var(--line)}
+.btn.rec{background:var(--red)}
+.btn.sun{background:var(--sun);color:#14183a}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.setup{background:var(--card);border-radius:20px;padding:18px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:end;margin-bottom:18px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.setup label{display:block;font-weight:600;margin-bottom:4px}
+.setup input{width:100%;font-size:16px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);min-height:44px}
+.msg{grid-column:1/-1;margin:0;font-size:15px}
+.msg.bad{color:var(--red)}.msg.good{color:var(--ok)}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.chip{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:8px 14px;min-height:44px;font-size:16px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.search{flex:1 1 200px;font-size:16px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);min-height:44px}
+.prog{display:flex;align-items:center;gap:12px;margin:6px 0 16px;color:var(--muted);font-size:15px}
+.bar{flex:1;height:10px;background:var(--line);border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ok);transition:width .3s}
+.list{display:grid;gap:8px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:16px;padding:10px 14px}
+.row.busy{border-color:var(--red);box-shadow:inset 0 0 0 2px var(--red)}
+.say{font-size:28px;font-weight:700;line-height:1.3}
+.hint{font-size:14px;color:var(--muted)}
+.st{display:inline-block;font-size:13px;border-radius:999px;padding:1px 10px;margin-left:8px;vertical-align:middle;font-weight:600}
+.st.human{background:#cfeedd;color:#14532d}.st.synth{background:var(--card);color:var(--muted);border:1px solid var(--line)}.st.new{background:#ffe7a3;color:#5a4200}
+.acts{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.acts audio{height:40px;max-width:220px}
+.timer{font-variant-numeric:tabular-nums;color:var(--red);font-weight:700;align-self:center}
+.empty{color:var(--muted);text-align:center;padding:30px}
+footer{border-top:1px solid var(--line);color:var(--muted);font-size:15px;text-align:center}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media(max-width:700px){.row{grid-template-columns:minmax(0,1fr)}.acts{justify-content:flex-start}.setup{grid-template-columns:minmax(0,1fr)}.two{grid-template-columns:minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="band"><div class="wrap">
+  <h1>ห้องครู · เสียงอ่าน</h1>
+  <p>อัดเสียงหรืออัปโหลดไฟล์เสียงคนอ่านจริง แทนเสียงสังเคราะห์ในแอป (เก็บใน Firebase) <a href="index.html">กลับไปหน้าผู้เรียน</a></p>
+</div></header>
+
+<main class="band"><div class="wrap">
+  <div class="setup" id="login">
+    <div class="two">
+      <div><label for="em">อีเมลครู</label><input id="em" type="email" autocomplete="username" placeholder="teacher@gmail.com"></div>
+      <div><label for="pw">รหัสผ่าน</label><input id="pw" type="password" autocomplete="current-password"></div>
+    </div>
+    <button class="btn" id="signin">เข้าสู่ระบบ</button>
+    <p class="msg" id="msg" aria-live="polite"></p>
+  </div>
+  <div class="setup" id="who" hidden>
+    <div><b>เข้าสู่ระบบแล้ว:</b> <span id="whoEmail"></span></div>
+    <button class="btn alt" id="signout">ออกจากระบบ</button>
+    <p class="msg" id="msg2" aria-live="polite"></p>
+  </div>
+  <div class="tools" id="groups"></div>
+  <div class="tools">
+    <input class="search" id="q" type="search" placeholder="ค้นหาคำ เช่น ไก่ หรือ สระอา">
+    <button class="chip" id="onlyMissing" aria-pressed="false">เฉพาะที่ยังไม่มีเสียงคน</button>
+  </div>
+  <div class="prog"><span id="progText"></span><div class="bar"><i id="progBar" style="width:0"></i></div></div>
+  <div class="list" id="list"></div>
+</div></main>
+<footer class="band">สร้างสรรค์ โดย นายวนศาสตร์ วัฒนาสกุลลี</footer>
+<input type="file" id="file" accept="audio/*" class="vh" tabindex="-1">
+
+<script src="config.js"></script>
+<script src="audio/core.js"></script>
+<script>
+{
+const GROUPS=[["พยัญชนะ", [["ก ไก่", "กอ ไก่"], ["ข ไข่", "ขอ ไข่"], ["ฃ ขวด", "ฃอ ขวด"], ["ค ควาย", "คอ ควาย"], ["ฅ คน", "ฅอ คน"], ["ฆ ระฆัง", "ฆอ ระฆัง"], ["ง งู", "งอ งู"], ["จ จาน", "จอ จาน"], ["ฉ ฉิ่ง", "ฉอ ฉิ่ง"], ["ช ช้าง", "ชอ ช้าง"], ["ซ โซ่", "ซอ โซ่"], ["ฌ เฌอ", "ฌอ เฌอ"], ["ญ หญิง", "ญอ หญิง"], ["ฎ ชฎา", "ฎอ ชฎา"], ["ฏ ปฏัก", "ฏอ ปฏัก"], ["ฐ ฐาน", "ฐอ ฐาน"], ["ฑ มณโฑ", "ฑอ มณโฑ"], ["ฒ ผู้เฒ่า", "ฒอ ผู้เฒ่า"], ["ณ เณร", "ณอ เณร"], ["ด เด็ก", "ดอ เด็ก"], ["ต เต่า", "ตอ เต่า"], ["ถ ถุง", "ถอ ถุง"], ["ท ทหาร", "ทอ ทหาร"], ["ธ ธง", "ธอ ธง"], ["น หนู", "นอ หนู"], ["บ ใบไม้", "บอ ใบไม้"], ["ป ปลา", "ปอ ปลา"], ["ผ ผึ้ง", "ผอ ผึ้ง"], ["ฝ ฝา", "ฝอ ฝา"], ["พ พาน", "พอ พาน"], ["ฟ ฟัน", "ฟอ ฟัน"], ["ภ สำเภา", "ภอ สำเภา"], ["ม ม้า", "มอ ม้า"], ["ย ยักษ์", "ยอ ยักษ์"], ["ร เรือ", "รอ เรือ"], ["ล ลิง", "ลอ ลิง"], ["ว แหวน", "วอ แหวน"], ["ศ ศาลา", "ศอ ศาลา"], ["ษ ฤๅษี", "ษอ ฤๅษี"], ["ส เสือ", "สอ เสือ"], ["ห หีบ", "หอ หีบ"], ["ฬ จุฬา", "ฬอ จุฬา"], ["อ อ่าง", "ออ อ่าง"], ["ฮ นกฮูก", "ฮอ นกฮูก"]]], ["สระ", [["สระอะ", "สระ อะ"], ["กะ", "กะ"], ["สระอา", "สระ อา"], ["กา", "กา"], ["สระอิ", "สระ อิ"], ["กิ", "กิ"], ["สระอี", "สระ อี"], ["กี", "กี"], ["สระอึ", "สระ อึ"], ["กึ", "กึ"], ["สระอือ", "สระ อือ"], ["กือ", "กือ"], ["สระอุ", "สระ อุ"], ["กุ", "กุ"], ["สระอู", "สระ อู"], ["กู", "กู"], ["สระเอะ", "สระ เอะ"], ["เกะ", "เกะ"], ["สระเอ", "สระ เอ"], ["เก", "เก"], ["สระแอะ", "สระ แอะ"], ["แกะ", "แกะ"], ["สระแอ", "สระ แอ"], ["แก", "แก"], ["สระโอะ", "สระ โอะ"], ["โกะ", "โกะ"], ["สระโอ", "สระ โอ"], ["โก", "โก"], ["สระเอาะ", "สระ เอาะ"], ["เกาะ", "เกาะ"], ["สระออ", "สระ ออ"], ["กอ", "กอ"], ["สระอัวะ", "สระ อัวะ"], ["กัวะ", "กัวะ"], ["สระอัว", "สระ อัว"], ["กัว", "กัว"], ["สระเอียะ", "สระ เอียะ"], ["เกียะ", "เกียะ"], ["สระเอีย", "สระ เอีย"], ["เกีย", "เกีย"], ["สระเอือะ", "สระ เอือะ"], ["เกือะ", "เกือะ"], ["สระเอือ", "สระ เอือ"], ["เกือ", "เกือ"], ["สระเออะ", "สระ เออะ"], ["เกอะ", "เกอะ"], ["สระเออ", "สระ เออ"], ["เกอ", "เกอ"], ["สระอำ", "สระ อำ"], ["กำ", "กำ"], ["สระใอ", "สระ ใอ"], ["ใก", "ใก"], ["สระไอ", "สระ ไอ"], ["ไก", "ไก"], ["สระเอา", "สระ เอา"], ["เกา", "เกา"], ["ฤ", "ฤ"], ["ฤๅ", "ฤๅ"], ["ฦ", "ฦ"], ["ฦๅ", "ฦๅ"]]], ["วรรณยุกต์", [["ไม้เอก", "ไม้เอก"], ["ไม้โท", "ไม้โท"], ["ไม้ตรี", "ไม้ตรี"], ["ไม้จัตวา", "ไม้จัตวา"], ["กา", "กา"], ["ก่า", "ก่า"], ["ก้า", "ก้า"], ["ก๊า", "ก๊า"], ["ก๋า", "ก๋า"], ["ขา", "ขา"], ["ข่า", "ข่า"], ["ข้า", "ข้า"], ["คา", "คา"], ["ค่า", "ค่า"], ["ค้า", "ค้า"]]], ["คำศัพท์", [["พ่อ", "พ่อ"], ["แม่", "แม่"], ["พี่", "พี่"], ["น้อง", "น้อง"], ["ปู่", "ปู่"], ["ย่า", "ย่า"], ["ตา", "ตา"], ["ยาย", "ยาย"], ["ลูก", "ลูก"], ["หลาน", "หลาน"], ["หัว", "หัว"], ["ผม", "ผม"], ["หู", "หู"], ["จมูก", "จมูก"], ["ปาก", "ปาก"], ["ฟัน", "ฟัน"], ["มือ", "มือ"], ["ขา", "ขา"], ["เท้า", "เท้า"], ["ข้าว", "ข้าว"], ["น้ำ", "น้ำ"], ["ไข่", "ไข่"], ["ปลา", "ปลา"], ["ไก่", "ไก่"], ["หมู", "หมู"], ["ผัก", "ผัก"], ["ผลไม้", "ผลไม้"], ["นม", "นม"], ["เกลือ", "เกลือ"], ["บ้าน", "บ้าน"], ["ประตู", "ประตู"], ["โต๊ะ", "โต๊ะ"], ["เก้าอี้", "เก้าอี้"], ["ถ้วย", "ถ้วย"], ["จาน", "จาน"], ["ช้อน", "ช้อน"], ["ร่ม", "ร่ม"], ["เสื้อ", "เสื้อ"], ["กระเป๋า", "กระเป๋า"], ["หนึ่ง", "หนึ่ง"], ["สอง", "สอง"], ["สาม", "สาม"], ["สี่", "สี่"], ["ห้า", "ห้า"], ["หก", "หก"], ["เจ็ด", "เจ็ด"], ["แปด", "แปด"], ["เก้า", "เก้า"], ["สิบ", "สิบ"], ["ห้องน้ำ", "ห้องน้ำ"], ["ทางเข้า", "ทางเข้า"], ["ทางออก", "ทางออก"], ["หยุด", "หยุด"], ["ระวัง", "ระวัง"], ["อันตราย", "อันตราย"], ["ห้ามสูบบุหรี่", "ห้ามสูบบุหรี่"], ["โรงพยาบาล", "โรงพยาบาล"], ["โรงเรียน", "โรงเรียน"], ["ร้านค้า", "ร้านค้า"]]], ["ประโยค", [["แม่ ไป ตลาด ซื้อ ปลา", "แม่ไปตลาดซื้อปลา"], ["พ่อ ปลูก ผัก ที่ สวน", "พ่อปลูกผักที่สวน"], ["ฉัน ดื่ม น้ำ ทุก วัน", "ฉันดื่มน้ำทุกวัน"], ["ลูก ไป โรงเรียน ตอน เช้า", "ลูกไปโรงเรียนตอนเช้า"], ["ยาย ทำ ข้าว ให้ หลาน กิน", "ยายทำข้าวให้หลานกิน"], ["วันนี้ ฝน ตก หนัก", "วันนี้ฝนตกหนัก"], ["ล้าง มือ ก่อน กิน ข้าว", "ล้างมือก่อนกินข้าว"], ["ห้าม สูบ บุหรี่ ใน ห้อง นี้", "ห้ามสูบบุหรี่ในห้องนี้"], ["ไป หา หมอ ที่ โรงพยาบาล", "ไปหาหมอที่โรงพยาบาล"], ["ฉัน เขียน ชื่อ ของ ฉัน ได้", "ฉันเขียนชื่อของฉันได้"]]], ["คำในประโยค", [["ไป", "ไป"], ["ตลาด", "ตลาด"], ["ซื้อ", "ซื้อ"], ["ปลูก", "ปลูก"], ["ที่", "ที่"], ["สวน", "สวน"], ["ฉัน", "ฉัน"], ["ดื่ม", "ดื่ม"], ["ทุก", "ทุก"], ["วัน", "วัน"], ["ตอน", "ตอน"], ["เช้า", "เช้า"], ["ทำ", "ทำ"], ["ให้", "ให้"], ["กิน", "กิน"], ["วันนี้", "วันนี้"], ["ฝน", "ฝน"], ["ตก", "ตก"], ["หนัก", "หนัก"], ["ล้าง", "ล้าง"], ["ก่อน", "ก่อน"], ["ห้าม", "ห้าม"], ["สูบ", "สูบ"], ["บุหรี่", "บุหรี่"], ["ใน", "ใน"], ["ห้อง", "ห้อง"], ["นี้", "นี้"], ["หา", "หา"], ["หมอ", "หมอ"], ["เขียน", "เขียน"], ["ชื่อ", "ชื่อ"], ["ของ", "ของ"], ["ได้", "ได้"]]], ["เสียงตอบรับ", [["ถูกต้อง", "ถูกต้อง"], ["ยังไม่ถูก คำตอบคือ…", "ยังไม่ถูก คำตอบคือ"]]]];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const CORE=window.__core||{};
+const CFG=window.TL_FIREBASE||{};
+const SDK='https://www.gstatic.com/firebasejs/10.14.1/';
+const MAX_B64=950000;     // Firestore document limit is 1 MiB
+const REC={};             // key -> updated time
+const pending={};         // key -> {blob,url}
+let group=0,authed=false,recState=null,busyKey=null,fb=null;
+const ALL=GROUPS.flatMap(([g,items])=>items.map(([label,key])=>({g,label,key})));
+
+function msg(t,cls){for(const id of ['#msg','#msg2']){const m=$(id);m.textContent=t;m.className='msg '+(cls||'')}}
+function fbErr(e){
+  const c=e&&e.code||'';
+  if(c.includes('invalid-credential')||c.includes('wrong-password')||c.includes('user-not-found')||c.includes('invalid-email'))return 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+  if(c.includes('too-many-requests'))return 'ลองผิดหลายครั้งเกินไป รอสักครู่แล้วลองใหม่';
+  if(c.includes('permission-denied'))return 'บัญชีนี้ไม่มีสิทธิ์แก้ไขเสียง ตรวจอีเมลในกฎ Firestore (README ขั้นที่ 2.5)';
+  if(c.includes('network')||c.includes('unavailable'))return 'เชื่อมต่ออินเทอร์เน็ตไม่ได้';
+  return (e&&e.message)||'เกิดข้อผิดพลาด';
+}
+
+/* ---------- Firebase ---------- */
+async function initFirebase(){
+  if(!CFG.apiKey||!CFG.projectId){msg('ยังไม่ได้ใส่ค่า Firebase ในไฟล์ config.js (ดู README.md ขั้นที่ 2) ตอนนี้ฟังได้เฉพาะเสียงสังเคราะห์','bad');return}
+  const [app,fs,au]=await Promise.all([import(SDK+'firebase-app.js'),import(SDK+'firebase-firestore.js'),import(SDK+'firebase-auth.js')]);
+  const a=app.initializeApp(CFG);
+  fb={fs,au,db:fs.getFirestore(a),auth:au.getAuth(a)};
+  au.onAuthStateChanged(fb.auth,u=>{
+    authed=!!u;$('#login').hidden=authed;$('#who').hidden=!authed;
+    $('#whoEmail').textContent=u?u.email:'';
+    if(u)msg('อัดเสียงหรืออัปโหลดไฟล์ได้เลย','good');
+    render();
+  });
+  await loadIndex();
+}
+async function loadIndex(){
+  const {fs,db}=fb;
+  const s=await fs.getDoc(fs.doc(db,'meta','index'));
+  for(const k in REC)delete REC[k];
+  Object.assign(REC,(s.exists()&&s.data().keys)||{});
+  render();
+}
+initFirebase().catch(e=>msg('เชื่อมต่อ Firebase ไม่ได้: '+fbErr(e),'bad'));
+
+$('#signin').onclick=()=>{
+  if(!fb){msg('ยังเชื่อมต่อ Firebase ไม่ได้ ตรวจไฟล์ config.js','bad');return}
+  msg('กำลังเข้าสู่ระบบ…');
+  fb.au.signInWithEmailAndPassword(fb.auth,$('#em').value.trim(),$('#pw').value).catch(e=>msg(fbErr(e),'bad'));
+};
+$('#pw').addEventListener('keydown',e=>{if(e.key==='Enter')$('#signin').click()});
+$('#signout').onclick=()=>fb&&fb.au.signOut(fb.auth);
+
+/* ---------- playback ---------- */
+const player=new Audio();
+function b64url(b,mime){const bin=atob(b),u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);return URL.createObjectURL(new Blob([u8],{type:mime}))}
+const recCache={};
+function go(u){player.pause();player.src=u;player.play().catch(()=>{})}
+function play(key){
+  if(pending[key])return go(pending[key].url);
+  if(REC[key]&&fb){
+    if(recCache[key])return go(recCache[key]);
+    fb.fs.getDoc(fb.fs.doc(fb.db,'voices',key)).then(s=>{if(s.exists()){const d=s.data();go(recCache[key]=b64url(d.b64,d.mime||'audio/webm'))}}).catch(e=>msg(fbErr(e),'bad'));
+    return;
+  }
+  if(CORE[key])go('data:audio/mpeg;base64,'+CORE[key]);
+}
+
+/* ---------- recording ---------- */
+function pickMime(){const c=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus'];if(!window.MediaRecorder)return '';return c.find(m=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(m))||''}
+async function startRec(key){
+  if(recState)stopRec();
+  if(!navigator.mediaDevices||!window.MediaRecorder){msg('เบราว์เซอร์นี้อัดเสียงไม่ได้ ใช้ปุ่ม "อัปโหลดไฟล์" แทน','bad');return}
+  let stream;try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}})}
+  catch(e){msg('ไม่ได้รับอนุญาตให้ใช้ไมโครโฟน กดอนุญาตที่แถบที่อยู่ของเบราว์เซอร์แล้วลองใหม่','bad');return}
+  const mime=pickMime();const opt={audioBitsPerSecond:48000};if(mime)opt.mimeType=mime;
+  const mr=new MediaRecorder(stream,opt);const chunks=[];
+  mr.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+  mr.onstop=()=>{stream.getTracks().forEach(t=>t.stop());const blob=new Blob(chunks,{type:mr.mimeType||mime||'audio/webm'});setPending(key,blob);recState=null;busyKey=null;render();go(pending[key].url)};
+  const t0=Date.now();recState={key,mr,timer:setInterval(()=>{const el=document.querySelector('.timer');if(el)el.textContent=((Date.now()-t0)/1000).toFixed(1)+' วิ';if(Date.now()-t0>15000)stopRec()},100)};
+  busyKey=key;mr.start();render();
+}
+function stopRec(){if(!recState)return;clearInterval(recState.timer);if(recState.mr.state!=='inactive')recState.mr.stop()}
+function setPending(key,blob){if(pending[key])URL.revokeObjectURL(pending[key].url);pending[key]={blob,url:URL.createObjectURL(blob)}}
+let fileKey=null;
+$('#file').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f||!fileKey)return;
+  if(f.size>700*1024){msg('ไฟล์ใหญ่เกิน 700 KB ตัดให้สั้นลง หรือใช้ปุ่ม "อัดเสียง" แทน','bad');return}
+  if(!/^audio\//.test(f.type)&&!/\.(mp3|m4a|wav|ogg|webm|aac)$/i.test(f.name)){msg('เลือกได้เฉพาะไฟล์เสียง','bad');return}
+  setPending(fileKey,f);render();go(pending[fileKey].url)};
+
+/* ---------- save / delete ---------- */
+function toB64(blob){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=rej;r.readAsDataURL(blob)})}
+async function save(key){
+  const p=pending[key];if(!p||!fb)return;
+  const b64=await toB64(p.blob);
+  if(b64.length>MAX_B64){msg('เสียงยาวเกินไป อัดให้สั้นลง (ไม่เกินประมาณ 15 วินาที)','bad');return}
+  busyKey=key;render();
+  try{
+    const {fs,db}=fb,t=Date.now();
+    await fs.setDoc(fs.doc(db,'voices',key),{b64,mime:p.blob.type||'audio/webm',updated:t});
+    await fs.setDoc(fs.doc(db,'meta','index'),{keys:{[key]:t}},{merge:true});
+    REC[key]=t;recCache[key]=p.url;delete pending[key];msg('บันทึกเสียง "'+key+'" แล้ว','good');
+  }catch(e){msg('บันทึกไม่สำเร็จ: '+fbErr(e),'bad')}
+  busyKey=null;render();
+}
+async function del(key){
+  if(!fb)return;busyKey=key;render();
+  try{
+    const {fs,db}=fb;
+    await fs.deleteDoc(fs.doc(db,'voices',key));
+    await fs.updateDoc(fs.doc(db,'meta','index'),new fs.FieldPath('keys',key),fs.deleteField());
+    delete REC[key];delete recCache[key];msg('ลบเสียงคน "'+key+'" แล้ว แอปจะกลับไปใช้เสียงสังเคราะห์','good');
+  }catch(e){msg('ลบไม่สำเร็จ: '+fbErr(e),'bad')}
+  busyKey=null;render();
+}
+
+/* ---------- render ---------- */
+function rowHTML(it){
+  const k=it.key,rec=recState&&recState.key===k,busy=busyKey===k&&!rec,p=pending[k];
+  const st=p?'<span class="st new">ยังไม่บันทึก</span>':REC[k]?'<span class="st human">เสียงคน</span>':'<span class="st synth">เสียงสังเคราะห์</span>';
+  const hint=it.label!==k?`<div class="hint">อ่านว่า: ${esc(k)}</div>`:'';
+  const dis=authed?'':'disabled title="เข้าสู่ระบบก่อน"';
+  let acts;
+  if(rec)acts=`<span class="timer">0.0 วิ</span><button class="btn rec" data-a="stop">หยุดอัด</button>`;
+  else if(busy)acts=`<span class="hint">กำลังบันทึก…</span>`;
+  else{
+    acts=`<button class="btn alt" data-a="play">ฟัง</button><button class="btn rec" data-a="rec" ${dis}>อัดเสียง</button><button class="btn alt" data-a="file" ${dis}>อัปโหลดไฟล์</button>`;
+    if(p)acts+=`<button class="btn sun" data-a="save" ${dis}>บันทึก</button><button class="btn alt" data-a="cancel">ยกเลิก</button>`;
+    else if(REC[k]&&authed)acts+=`<button class="btn alt" data-a="del">ลบเสียงคน</button>`;
+  }
+  return `<div class="row${rec?' busy':''}" data-k="${esc(k)}"><div><span class="say">${esc(it.label)}</span>${st}${hint}</div><div class="acts">${acts}</div></div>`;
+}
+function render(){
+  $('#groups').innerHTML=['ทั้งหมด',...GROUPS.map(g=>g[0])].map((g,i)=>{const n=i?GROUPS[i-1][1].length:ALL.length;return `<button class="chip" data-g="${i}" aria-pressed="${group===i}">${g} (${n})</button>`}).join('');
+  const q=$('#q').value.trim(),only=$('#onlyMissing').getAttribute('aria-pressed')==='true';
+  const items=ALL.filter(it=>(!group||it.g===GROUPS[group-1][0])&&(!q||it.label.includes(q)||it.key.includes(q))&&(!only||!REC[it.key]));
+  $('#list').innerHTML=items.length?items.map(rowHTML).join(''):'<p class="empty">ไม่พบรายการ</p>';
+  const done=ALL.filter(it=>REC[it.key]).length;
+  $('#progText').textContent=`มีเสียงคนแล้ว ${done} จาก ${ALL.length} รายการ`;$('#progBar').style.width=(done/ALL.length*100)+'%';
+}
+$('#groups').onclick=e=>{const b=e.target.closest('[data-g]');if(b){group=+b.dataset.g;render()}};
+$('#q').oninput=render;
+$('#onlyMissing').onclick=e=>{const b=e.currentTarget;b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')==='true'?'false':'true');render()};
+$('#list').onclick=e=>{
+  const b=e.target.closest('[data-a]');if(!b||b.disabled)return;const k=b.closest('[data-k]').dataset.k,a=b.dataset.a;
+  if(a==='play')play(k);else if(a==='rec')startRec(k);else if(a==='stop')stopRec();
+  else if(a==='file'){fileKey=k;$('#file').click()}else if(a==='save')save(k);
+  else if(a==='cancel'){URL.revokeObjectURL(pending[k].url);delete pending[k];render()}
+  else if(a==='del')del(k);
+};
+render();
+}
+
+</script>
+</body>
+</html>
