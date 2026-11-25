@@ -10,9 +10,9 @@
 /* VOICE: warm, encouraging classroom tool for adult & community learners
    IDEA: the wall of letter cards in a Thai village learning centre
    PICTURE: one huge letter card that speaks, beside the full ก–ฮ board
-   COLOUR and TYPE: white, royal blue band, sun yellow, primer red; K2D throughout
+   COLOUR and TYPE: Thai-flag tones: royal blue bars, white reading surfaces, red accents; black text; K2D
    LAYOUT: navy app bar, hero + lesson cards on home, bottom tab bar like a phone app */
-:root{color-scheme:light dark;--bg:light-dark(#f6eedf,#0f1626);--ink:light-dark(#1b2236,#f3ead8);--blue:light-dark(#1c2b4f,#3d5591);--navy:#14213d;--navy2:#22335c;--sun:#e0b45a;--gold1:#f6dc94;--gold2:#c18a2c;--red:light-dark(#c0392b,#ff7a6b);--card:light-dark(#fffaf1,#18213a);--line:light-dark(#e6d6b8,#2e3a5c);--muted:light-dark(#6b5f4a,#b9ae98);--ok:light-dark(#1f7a4a,#5fd39a)}
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#0e1630);--ink:light-dark(#111111,#f2f4fa);--blue:light-dark(#1a3d8f,#5b7fe0);--navy:#14307a;--navy2:#1f45a8;--sun:#d7263d;--gold1:#ffffff;--gold2:#d7263d;--red:light-dark(#d7263d,#ff6b7a);--card:light-dark(#ffffff,#16203f);--line:light-dark(#dfe5f3,#2b3a66);--muted:light-dark(#4a4f5c,#b8bfd3);--ok:light-dark(#1f7a4a,#5fd39a)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 K2D,system-ui,sans-serif;overflow-x:clip}
@@ -26,8 +26,8 @@ h2{font-size:clamp(24px,3vw,32px);margin-bottom:6px}
 .speed{display:flex;align-items:center;gap:8px;font-size:15px}
 .speed select{font:inherit;font-size:16px;border-radius:10px;border:0;padding:8px 10px;min-height:44px}
 a:focus-visible,button:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
-body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
-.pattern{background-color:var(--navy);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Cpath d='M14 2l12 12-12 12L2 14z' fill='none' stroke='%23e0b45a' stroke-opacity='.13'/%3E%3Ccircle cx='14' cy='14' r='2' fill='%23e0b45a' fill-opacity='.12'/%3E%3C/svg%3E")}
+body{padding-bottom:calc(100px + env(safe-area-inset-bottom))}
+.pattern{background-color:var(--navy);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Cpath d='M14 2l12 12-12 12L2 14z' fill='none' stroke='%23ffffff' stroke-opacity='.10'/%3E%3Ccircle cx='14' cy='14' r='2' fill='%23ffffff' fill-opacity='.10'/%3E%3C/svg%3E")}
 .appbar{position:sticky;top:0;z-index:20;display:grid;grid-template-columns:48px minmax(0,1fr) auto;align-items:center;gap:8px;padding:8px max(4vw,12px);color:#fff;border-bottom:2px solid var(--gold2)}
 .ib{width:44px;height:44px;border-radius:50%;border:1px solid rgba(246,220,148,.5);background:rgba(255,255,255,.06);color:var(--gold1);display:grid;place-items:center;font-size:26px;line-height:1}
 .ib[hidden]{display:grid!important;visibility:hidden}
@@ -156,21 +156,52 @@ footer{border-top:1px solid var(--line);color:var(--muted);font-size:15px;text-a
 @media(max-width:760px){.board,.mix{grid-template-columns:minmax(0,1fr)}.focus,.result{position:static}.sent{grid-template-columns:48px minmax(0,1fr)}.sent .row{grid-column:1/-1}.sent>img{width:48px;height:48px}}
 @media(max-width:600px){.grid{grid-template-columns:repeat(auto-fill,minmax(64px,1fr))}.tile b{font-size:32px}.opt{font-size:36px;min-height:84px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ---- blue / white / red theme overrides ---- */
+.pattern{background-color:#14307a}
+.abt{background:linear-gradient(180deg,#fff6cf,#f6dc94 40%,#e0b45a 70%,#c18a2c);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.speed{color:#fff}.speed select{background:#1f45a8;border-color:rgba(255,255,255,.55)}
+.appbar{border-bottom:4px solid var(--red);box-shadow:0 4px 0 #fff inset}
+.hhero{background-color:#14307a}
+.hhero .en{color:#f6dc94}
+.hhero h1{background:linear-gradient(180deg,#fff3c9,#f6dc94 45%,#e0b45a 70%,#c18a2c);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;filter:drop-shadow(0 3px 0 rgba(0,0,0,.35))}
+.cta{color:#fff;background:linear-gradient(180deg,#ff5a6c,#d7263d 55%,#a3142a);border:3px solid #fff;box-shadow:0 7px 0 -1px #7d0f20,0 14px 26px rgba(0,0,0,.3)}
+.cta small{background:#fff;color:#14307a}
+.btn.sun{background:var(--red);color:#fff}
+.w.hl{background:#ffe0e5;color:#111}
+.lesson{background:#fff;color:#111;border-color:var(--line);box-shadow:0 3px 0 #e3e9f7}
+.lesson .ic{border-color:var(--blue);background:#14307a}
+.lesson .en{color:var(--blue)}
+.lesson:hover{border-color:var(--red)}
+.ic.quad{display:grid!important;grid-template-columns:1fr 1fr;gap:1px;background:#fff!important}
+.ic.quad img{width:100%;height:100%;object-fit:cover}
+.shelfh{background:#e8eefc;border-color:#9fb4ec;color:#111}
+.prow{background:#fff}
+.tabbar{grid-template-columns:repeat(3,minmax(0,1fr));background:#fff;padding-top:8px}
+.tabbar a{color:#111;font-size:13px;gap:4px}
+.tabbar a::before{display:none!important}
+.tabbar .ti{width:46px;height:40px;border-radius:14px;display:grid;place-items:center;color:var(--c);background:color-mix(in srgb,var(--c) 13%,#fff);transition:transform .2s,background .2s}
+.tabbar .ti svg{width:24px;height:24px}
+.tabbar a[aria-current=page]{color:#111}
+.tabbar a[aria-current=page] .ti{color:#fff;background:linear-gradient(160deg,var(--c),var(--c2));box-shadow:0 6px 14px color-mix(in srgb,var(--c) 45%,transparent);transform:translateY(-3px)}
+.tabbar a[aria-current=page] b{color:var(--c)}
+.tabbar b{font-weight:700}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .lesson,:root:not([data-theme=light]) .prow,:root:not([data-theme=light]) .tabbar{background:#16203f;color:#f2f4fa}:root:not([data-theme=light]) .tabbar a{color:#f2f4fa}}
+:root[data-theme=dark] .lesson,:root[data-theme=dark] .prow,:root[data-theme=dark] .tabbar{background:#16203f;color:#f2f4fa}:root[data-theme=dark] .tabbar a{color:#f2f4fa}
 </style>
 </head>
 <body>
 <header class="appbar pattern">
   <button class="ib" id="back" aria-label="กลับหน้าแรก" hidden>‹</button>
-  <div class="abt" id="abTitle">รู้ภาษาไทย</div>
+  <div class="abt" id="abTitle">รู้หนังสือไทย</div>
   <label class="speed"><span>เสียง</span>
     <select id="rate" aria-label="ความเร็วเสียง"><option value="0.8">ช้า</option><option value="1" selected>ปกติ</option><option value="1.15">เร็ว</option></select>
   </label>
 </header>
 <nav id="nav" class="tabbar" aria-label="เมนูหลัก">
-  <a href="#home"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 2 11h3v9h5v-6h4v6h5v-9h3z"/></svg>หน้าแรก</a>
-  <a href="#library"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h3v16H4zM8.5 4h3v16h-3zM13 5.2l2.9-.8 4.1 15.4-2.9.8z"/></svg>ห้องสมุด</a>
-  <a href="#progress"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 20h3v-6H4zm6.5 0h3V9h-3zM17 20h3V4h-3z"/></svg>ความก้าวหน้า</a>
-  <a href="#quiz"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-1.2 14.6-4.3-4.3 1.6-1.6 2.7 2.7 5.6-5.6 1.6 1.6z"/></svg>แบบทดสอบ</a>
+  <a href="#home" style="--c:#1f4fd1;--c2:#14307a"><span class="ti"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 2 11h3v9h5v-6h4v6h5v-9h3z"/></svg></span><b>หน้าแรก</b></a>
+  <a href="#progress" style="--c:#d7263d;--c2:#a3142a"><span class="ti"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 20h3v-6H4zm6.5 0h3V9h-3zM17 20h3V4h-3z"/></svg></span><b>ความก้าวหน้า</b></a>
+  <a href="#quiz" style="--c:#6a2bd9;--c2:#3b1a8f"><span class="ti"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-1.2 14.6-4.3-4.3 1.6-1.6 2.7 2.7 5.6-5.6 1.6 1.6z"/></svg></span><b>แบบทดสอบ</b></a>
 </nav>
 
 <main class="band"><div class="wrap">
@@ -184,6 +215,14 @@ footer{border-top:1px solid var(--line);color:var(--muted);font-size:15px;text-a
     </div>
     <div style="text-align:center"><a class="cta" id="cta" href="#consonants"><b>เริ่มต้นการเรียนรู้</b><small>START YOUR JOURNEY</small></a></div>
     <div class="lessons" id="lessonList" style="margin-top:26px"></div>
+  </section>
+
+  <section id="v-basics" hidden>
+    <div class="homecol">
+      <h2>รู้จักภาษาไทยเบื้องต้น</h2>
+      <p class="lead">5 บท เรียนตามลำดับ จากพยัญชนะ สระ วรรณยุกต์ ประสมคำ ถึงวันและเดือน</p>
+      <div class="lessons" id="basicList"></div>
+    </div>
   </section>
 
   <section id="v-library" hidden>
@@ -577,27 +616,36 @@ $('#v-days').onclick=e=>{
 };
 
 /* ---------- home lessons, progress ---------- */
-const LESSONS=[["c01","LESSON 1: CONSONANTS","บทที่ 1: พยัญชนะไทย","consonants"],["c02","LESSON 2: VOWELS","บทที่ 2: สระภาษาไทย","vowels"],["c03","LESSON 3: TONE MARKS","บทที่ 3: วรรณยุกต์ไทย","tones"],["c04","LESSON 4: SPELLING","บทที่ 4: แบบฝึกประสมคำ","mix"],["c05","LESSON 5: DAYS & MONTHS","บทที่ 5: 7 วัน 12 เดือน","days"],["i:1f4d6","VOCABULARY","คำศัพท์ในชีวิตประจำวัน","words"],["i:1f4dd","BASIC READING","ฝึกอ่านประโยค","read"],["i:1f3af","QUIZ","แบบทดสอบ ฟังแล้วเลือก","quiz"],["c07","LIBRARY","ห้องสมุดหนังสือ ตอนที่ ๑–๓","library"]];
-const TITLES={home:'รู้ภาษาไทย',library:'ห้องสมุด',progress:'ความก้าวหน้า'};LESSONS.forEach(l=>{if(!TITLES[l[3]])TITLES[l[3]]=l[2].replace(/^บทที่ \d+: /,'')});
+const CHAPTERS=[["c01","LESSON 1: CONSONANTS","บทที่ 1: พยัญชนะไทย","consonants"],["c02","LESSON 2: VOWELS","บทที่ 2: สระภาษาไทย","vowels"],["c03","LESSON 3: TONE MARKS","บทที่ 3: วรรณยุกต์ไทย","tones"],["c04","LESSON 4: SPELLING","บทที่ 4: แบบฝึกประสมคำ","mix"],["c05","LESSON 5: DAYS & MONTHS","บทที่ 5: 7 วัน 12 เดือน","days"]];
+const LESSONS=[["basics","BASIC THAI · 5 CHAPTERS","รู้จักภาษาไทยเบื้องต้น","basics"],["i:1f4d6","VOCABULARY","คำศัพท์ในชีวิตประจำวัน","words"],["i:1f4dd","BASIC READING","ฝึกอ่านประโยค","read"],["i:1f3af","QUIZ","แบบทดสอบ ฟังแล้วเลือก","quiz"],["c07","LIBRARY","ห้องสมุดหนังสือ ตอนที่ ๑–๓","library"]];
+const LEARN=[...CHAPTERS.map(c=>c[3]),'words','read','quiz'];
+const PARENT={};CHAPTERS.forEach(c=>PARENT[c[3]]='basics');
+const TITLES={home:'รู้หนังสือไทย',library:'ห้องสมุด',progress:'ความก้าวหน้า',basics:'รู้จักภาษาไทยเบื้องต้น',words:'คำศัพท์',read:'ฝึกอ่านประโยค',quiz:'แบบทดสอบ'};
+CHAPTERS.forEach(l=>{TITLES[l[3]]=l[2].replace(/^บทที่ \d+: /,'')});
 const visited=new Set((()=>{try{return JSON.parse(localStorage.getItem('tl-visited')||'[]')}catch(e){return []}})());
 function lessonNote(v){
+  if(v==='basics'){const n=CHAPTERS.filter(c=>visited.has(c[3])).length;return n?`เรียนแล้ว ${n}/5 บท`:''}
   if(v==='consonants')return heard.size?`ฟังแล้ว ${heard.size}/44 ตัว`:'';
   if(v==='quiz'){const t=[];if(best.letter!=null)t.push('พยัญชนะ '+best.letter+'/10');if(best.word!=null)t.push('คำศัพท์ '+best.word+'/10');return t.length?'ดีที่สุด: '+t.join(' · '):''}
   return visited.has(v)?'เรียนแล้ว':'';
 }
-function renderHome(){
-  $('#lessonList').innerHTML=LESSONS.map(([img,en,th,v])=>{
-    const ic=img.startsWith('i:')?`<span class="ic e"><img src="img/${img.slice(2)}.svg" alt=""></span>`:`<span class="ic"><img src="covers/${img}.jpg" alt=""></span>`;
-    const n=lessonNote(v);
-    return `<a class="lesson" href="#${v}">${ic}<span><span class="en">${esc(en)}</span><span class="th">${esc(th)}</span>${n?`<span class="pg">✓ ${esc(n)}</span>`:''}</span><span class="chev" aria-hidden="true">›</span></a>`}).join('');
-  const next=LESSONS.slice(0,8).find(l=>!visited.has(l[3]));$('#cta').href='#'+(next?next[3]:'consonants');
+function cardHTML([img,en,th,v]){
+  const ic=img==='quad'?`<span class="ic quad">${['c01','c02','c03','c04'].map(c=>`<img src="covers/${c}.jpg" alt="">`).join('')}</span>`:img.startsWith('i:')?`<span class="ic e"><img src="img/${img.slice(2)}.svg" alt=""></span>`:`<span class="ic"><img src="covers/${img}.jpg" alt=""></span>`;
+  const n=lessonNote(v);
+  return `<a class="lesson" href="#${v}">${ic}<span><span class="en">${esc(en)}</span><span class="th">${esc(th)}</span>${n?`<span class="pg">✓ ${esc(n)}</span>`:''}</span><span class="chev" aria-hidden="true">›</span></a>`;
 }
+function renderHome(){
+  $('#lessonList').innerHTML=LESSONS.map(cardHTML).join('');
+  const next=LEARN.find(v=>!visited.has(v));$('#cta').href='#'+(next||'basics');
+}
+function renderBasics(){$('#basicList').innerHTML=CHAPTERS.map(cardHTML).join('')}
 function renderProgress(){
   const rows=[['พยัญชนะที่ฟังแล้ว',heard.size,44]];
-  const done=LESSONS.slice(0,8).filter(l=>visited.has(l[3])).length;rows.push(['บทเรียนที่เข้าเรียนแล้ว',done,8]);
+  rows.push(['บทในเล่ม "รู้จักภาษาไทยเบื้องต้น"',CHAPTERS.filter(c=>visited.has(c[3])).length,5]);
+  rows.push(['บทเรียนทั้งหมดที่เข้าเรียนแล้ว',LEARN.filter(v=>visited.has(v)).length,LEARN.length]);
   if(best.letter!=null)rows.push(['แบบทดสอบพยัญชนะ (คะแนนดีที่สุด)',best.letter,10]);
   if(best.word!=null)rows.push(['แบบทดสอบคำศัพท์ (คะแนนดีที่สุด)',best.word,10]);
-  $('#progList').innerHTML=rows.map(([t,n,m])=>`<div class="prow"><b>${t}</b><span>${n}/${m}</span><div class="bar"><i style="width:${Math.round(n/m*100)}%"></i></div></div>`).join('');
+  $('#progList').innerHTML=rows.map(([t,n,m])=>`<div class="prow"><b>${esc(t)}</b><span>${n}/${m}</span><div class="bar"><i style="width:${Math.round(n/m*100)}%"></i></div></div>`).join('');
 }
 let resetArm=false;
 $('#progReset').onclick=()=>{
@@ -605,17 +653,17 @@ $('#progReset').onclick=()=>{
   try{['tl-heard','tl-best','tl-visited'].forEach(k=>localStorage.removeItem(k))}catch(e){}
   heard.clear();visited.clear();delete best.letter;delete best.word;resetArm=false;$('#progReset').textContent='ล้างความก้าวหน้า';renderProgress();renderC();showBest();
 };
-$('#back').onclick=()=>{location.hash='#home'};
+$('#back').onclick=()=>{location.hash='#'+(PARENT[view]||'home')};
 
 /* ---------- routing ---------- */
-const views=['home','library','progress','consonants','vowels','tones','mix','days','words','read','quiz'];let view='home';
+const views=['home','basics','library','progress','consonants','vowels','tones','mix','days','words','read','quiz'];let view='home';
 function route(){
   const h=location.hash.slice(1);view=views.includes(h)?h:'home';
   views.forEach(v=>{$('#v-'+v).hidden=v!==view});
-  $('#abTitle').textContent=TITLES[view]||'รู้ภาษาไทย';$('#back').hidden=view==='home';
-  if(!['home','library','progress'].includes(view)&&!visited.has(view)){visited.add(view);try{localStorage.setItem('tl-visited',JSON.stringify([...visited]))}catch(e){}}
-  if(view==='home')renderHome();if(view==='progress')renderProgress();
-  document.querySelectorAll('#nav a').forEach(a=>{if(a.getAttribute('href')==='#'+view)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+  $('#abTitle').textContent=TITLES[view]||'รู้หนังสือไทย';$('#back').setAttribute('aria-label',PARENT[view]?'กลับไปเล่มรู้จักภาษาไทยเบื้องต้น':'กลับหน้าแรก');$('#back').hidden=view==='home';
+  if(!['home','basics','library','progress'].includes(view)&&!visited.has(view)){visited.add(view);try{localStorage.setItem('tl-visited',JSON.stringify([...visited]))}catch(e){}}
+  if(view==='home')renderHome();if(view==='basics')renderBasics();if(view==='progress')renderProgress();
+  const tab=['progress','quiz'].includes(view)?view:'home';document.querySelectorAll('#nav a').forEach(a=>{if(a.getAttribute('href')==='#'+tab)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   stop();window.scrollTo(0,0);
 }
 window.addEventListener('hashchange',route);
