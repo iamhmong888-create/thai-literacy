@@ -56,6 +56,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--sun);outline-of
 .rmsg{grid-column:1/-1;font-size:15px;margin:0}.rmsg.bad{color:var(--red)}.rmsg.good{color:var(--ok)}
 .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);max-width:min(92vw,640px);background:#14183a;color:#fff;border-radius:14px;padding:12px 18px;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:9;font-size:16px}.toast.bad{background:#b3261e}.toast.good{background:#1f7a4a}
 [hidden]{display:none!important}
+.wave{grid-column:1/-1;display:block;width:100%;height:56px;background:#f2f5ff;border-radius:10px}
 .cvgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
 .cvc{border:1px solid var(--line);border-radius:18px;padding:12px;display:grid;gap:8px;align-content:start}
 .cvc.wide{grid-column:1/-1}
@@ -209,11 +210,28 @@ async function startRec(key){
   let stream;try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}})}
   catch(e){msg('ไม่ได้รับอนุญาตให้ใช้ไมโครโฟน กดอนุญาตที่แถบที่อยู่ของเบราว์เซอร์แล้วลองใหม่','bad');return}
   const mime=pickMime();const opt={audioBitsPerSecond:48000};if(mime)opt.mimeType=mime;
+  /* live waveform */
+  const hist=[];let ac=null,an=null,raf=0;
+  try{ac=new (window.AudioContext||window.webkitAudioContext)();an=ac.createAnalyser();an.fftSize=1024;ac.createMediaStreamSource(stream).connect(an)}catch(e){an=null}
+  const buf=an?new Float32Array(an.fftSize):null,tStart=performance.now();
+  const loop=()=>{raf=requestAnimationFrame(loop);if(!an)return;an.getFloatTimeDomainData(buf);let s=0;for(const x of buf)s+=x*x;const rms=Math.sqrt(s/buf.length);hist.push(rms);
+    const cv=document.querySelector('.row.busy canvas.wave');if(cv)drawWave(cv,hist,'#d7263d',true);
+    const w=document.getElementById('micWarn');if(w){const recent=hist.slice(-90);w.textContent=(performance.now()-tStart>1500&&Math.max(...recent)<.008)?'ไม่มีเสียงเข้าไมโครโฟน ตรวจว่าเลือกไมค์ถูกตัว และไม่ได้ปิดเสียงไว้':''}};
+  loop();
   const mr=new MediaRecorder(stream,opt);const chunks=[];
   mr.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
-  mr.onstop=()=>{stream.getTracks().forEach(t=>t.stop());const blob=new Blob(chunks,{type:mr.mimeType||mime||'audio/webm'});setPending(key,blob);recState=null;busyKey=null;render();go(pending[key].url)};
+  mr.onstop=()=>{cancelAnimationFrame(raf);try{ac&&ac.close()}catch(e){}stream.getTracks().forEach(t=>t.stop());const blob=new Blob(chunks,{type:mr.mimeType||mime||'audio/webm'});setPending(key,blob);if(hist.length)pending[key].wave=hist.slice();recState=null;busyKey=null;render();go(pending[key].url)};
   const t0=Date.now();recState={key,mr,timer:setInterval(()=>{const el=document.querySelector('.timer');if(el)el.textContent=((Date.now()-t0)/1000).toFixed(1)+' วิ';if(Date.now()-t0>15000)stopRec()},100)};
   busyKey=key;mr.start();render();
+}
+function drawWave(cv,arr,color,live){
+  const dpr=window.devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;if(!W)return;
+  if(cv.width!==Math.round(W*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr)}
+  const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
+  const bw=3,gap=2,n=Math.floor(W/(bw+gap));let data;
+  if(live)data=arr.slice(-n);else{data=[];for(let i=0;i<n;i++){const a=Math.floor(i*arr.length/n),b=Math.max(a+1,Math.floor((i+1)*arr.length/n));data.push(Math.max(...arr.slice(a,b)))}}
+  const mx=Math.max(.05,...arr);x.fillStyle=color;
+  const off=live?n-data.length:0;data.forEach((v,i)=>{const hh=Math.max(2,Math.min(H-4,(v/mx)*(H-6)));x.fillRect((i+off)*(bw+gap),(H-hh)/2,bw,hh)});
 }
 function stopRec(){if(!recState)return;clearInterval(recState.timer);if(recState.mr.state!=='inactive')recState.mr.stop()}
 function setPending(key,blob){delete rowMsg[key];if(pending[key])URL.revokeObjectURL(pending[key].url);pending[key]={blob,url:URL.createObjectURL(blob)}}
@@ -267,6 +285,7 @@ function rowHTML(it){
   const hint=it.label!==k?`<div class="hint">อ่านว่า: ${esc(k)}</div>`:'';
   const dis=authed?'':'disabled title="เข้าสู่ระบบก่อน"';
   let acts;
+  const wv=rec?'<canvas class="wave" aria-label="คลื่นเสียงขณะอัด"></canvas><p class="rmsg bad" id="micWarn"></p>':(p&&p.wave?`<canvas class="wave done" data-w="${esc(k)}" aria-label="คลื่นเสียงที่อัดไว้"></canvas>`:'');
   if(rec)acts=`<span class="timer">0.0 วิ</span><button class="btn rec" data-a="stop">หยุดอัด</button>`;
   else if(busy)acts=`<span class="hint">กำลังบันทึก…</span>`;
   else{
@@ -275,7 +294,7 @@ function rowHTML(it){
     else if(REC[k]&&authed)acts+=`<button class="btn alt" data-a="del">ลบเสียงคน</button>`;
   }
   const rm=rowMsg[k]?`<p class="rmsg ${rowMsg[k].c}">${esc(rowMsg[k].t)}</p>`:'';
-  return `<div class="row${rec?' busy':''}" data-k="${esc(k)}"><div><span class="say">${esc(it.label)}</span>${st}${hint}</div><div class="acts">${acts}</div>${rm}</div>`;
+  return `<div class="row${rec?' busy':''}" data-k="${esc(k)}"><div><span class="say">${esc(it.label)}</span>${st}${hint}</div><div class="acts">${acts}</div>${wv}${rm}</div>`;
 }
 function render(){
   rebuildAll();
@@ -286,6 +305,7 @@ function render(){
   const items=ALL.filter(it=>(!group||it.g===GN[group-1])&&(!q||it.label.includes(q)||it.key.includes(q))&&(!only||!REC[it.key]));
   $('#list').innerHTML=items.length?items.map(rowHTML).join(''):'<p class="empty">ไม่พบรายการ</p>';
   const np=Object.keys(pending).length;$('#saveAll').hidden=!np||!authed;$('#saveAll').textContent='บันทึกทั้งหมดที่ค้าง ('+np+')';
+  document.querySelectorAll('canvas.wave.done').forEach(cv=>{const p=pending[cv.dataset.w];if(p&&p.wave)drawWave(cv,p.wave,'#1a3d8f',false)});
   const done=ALL.filter(it=>REC[it.key]).length;
   $('#progText').textContent=`มีเสียงคนแล้ว ${done} จาก ${ALL.length} รายการ`;$('#progBar').style.width=(done/ALL.length*100)+'%';
 }
