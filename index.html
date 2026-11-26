@@ -545,10 +545,7 @@ function trimmed(key,mode){
       return trimCache[ck]=wavUrl(buf,s,e)});
 }
 function speakPart(part,onend){
-  const[,key,mode,short]=part;if(!mode){speak(key,onend);return}
-  const my=token;
-  if(REC[key])trimmed(key,mode).then(u=>{if(my===token)playUrl(u,short,onend,my)}).catch(()=>{if(my===token)speak(short,onend)});
-  else speak(short,onend);
+  const[,key,mode,short]=part;speak(mode?short:key,onend);
 }
 const sayPart=part=>{stop();speakPart(part)};
 function readParts(){
@@ -561,7 +558,7 @@ function readParts(){
 function partUrl(part){
   const[,key,mode,short]=part;
   const synth=k=>Promise.resolve(urlFor(k));
-  if(mode)return REC[key]?trimmed(key,mode).catch(()=>urlFor(short)):synth(short);
+  if(mode)return REC[short]?trimmed(short,'w').catch(()=>getRec(short)).catch(()=>urlFor(short)):synth(short);
   return REC[key]?trimmed(key,'w').catch(()=>getRec(key)).catch(()=>urlFor(key)):synth(key);
 }
 let mixBusy=false;
