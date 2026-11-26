@@ -311,6 +311,8 @@ footer{border-top:1px solid var(--line);color:var(--muted);font-size:15px;text-a
           <button class="btn sun" id="mPlay">ฟังการสะกด</button>
           <button class="btn alt" id="mRand" style="color:var(--ink)">สุ่มคำ</button>
         </div>
+        <div class="row" style="justify-content:center;margin-top:12px"><label for="mVoice" style="font-size:14px">เสียงอ่าน</label><select id="mVoice" style="font:inherit;font-size:16px;border-radius:999px;border:0;padding:6px 10px;min-height:40px;max-width:220px"></select></div>
+        <p class="note" id="mVoiceNote"></p>
         <p class="note" id="mNote">บางคำที่ผสมได้อาจไม่มีความหมาย ใช้ฝึกสะกดเสียง</p>
       </div>
     </div>
@@ -547,7 +549,7 @@ function trimmed(key,mode){
 function speakPart(part,onend){
   const[,key,mode,short]=part;speak(mode?short:key,onend);
 }
-const sayPart=part=>{stop();speakPart(part)};
+const sayPart=part=>{stop();if(useTTS())ttsSay(part[3]||part[1]);else speakPart(part)};
 function readParts(){
   const c=MC[mix.c],v=MV[mix.v],base=build(c,v,'',''),w=build(c,v,MT[mix.t][0],MF[mix.f]);
   const p=[[c+'อ',cKey(c),'c',c+'อ'],[v[0],'สระ '+v[0],'v',v[0]],[base,base]];
@@ -561,8 +563,28 @@ function partUrl(part){
   if(mode)return REC[short]?trimmed(short,'w').catch(()=>getRec(short)).catch(()=>urlFor(short)):synth(short);
   return REC[key]?trimmed(key,'w').catch(()=>getRec(key)).catch(()=>urlFor(key)):synth(key);
 }
+/* Thai text-to-speech voice of the device (Edge: Premwadee/Niwat, Chrome: Google ไทย, iPhone: Kanya) */
+function thVoices(){if(!synth)return[];const rank=v=>/premwadee|niwat|achara|natural|online|neural/i.test(v.name)?0:/google/i.test(v.name)?1:/kanya|narisa/i.test(v.name)?2:3;
+  return synth.getVoices().filter(v=>/^th/i.test(v.lang)).sort((a,b)=>rank(a)-rank(b))}
+function curVoice(){const vs=thVoices();const want=store.get('tl-voice','');return vs.find(v=>v.name===want)||vs[0]||null}
+function renderVoicePick(){const vs=thVoices(),sel=$('#mVoice'),cv=curVoice();
+  if(!vs.length){sel.hidden=true;$('#mVoiceNote').textContent='เครื่องนี้ไม่มีเสียงอ่านภาษาไทย จึงใช้เสียงสำรอง (เปิดใน Edge หรือ Chrome จะได้เสียงไทยที่ชัดกว่า)';return}
+  sel.hidden=false;$('#mVoiceNote').textContent='';sel.innerHTML=vs.map(v=>`<option value="${esc(v.name)}"${cv&&v.name===cv.name?' selected':''}>${esc(v.name.replace(/ - .*$/,'').replace(/^Microsoft |Online|\(Natural\)/g,'').trim()||v.name)}</option>`).join('')}
+function ttsSay(text,onend){const v=curVoice();if(!v){speak(text,onend);return}
+  const u=new SpeechSynthesisUtterance(text);u.lang=v.lang||'th-TH';try{u.voice=v}catch(e){}u.rate=Math.max(.5,+$('#rate').value*.85);
+  let done=false;const fin=()=>{if(done)return;done=true;onend&&onend()};u.onend=fin;u.onerror=fin;
+  synth.speak(u);setTimeout(()=>{if(!done&&!synth.speaking&&!synth.pending)fin()},Math.max(4000,text.length*700))}
+const useTTS=()=>!!curVoice();
 let mixBusy=false;
 async function playMixSeq(){
+  if(useTTS()){
+    const parts=readParts(),sp=[...document.querySelectorAll('#mRead [data-r]')];
+    const mark=i=>{sp.forEach((s,j)=>s.classList.toggle('on',j===i));$('#mOut').classList.toggle('on',i===parts.length-1)};
+    stop();const my=token;
+    const go=i=>{if(my!==token){mark(-1);return}mark(i);if(i>=parts.length){mark(-1);return}
+      const gap=(i===2&&parts.length>3)?550:300;ttsSay(parts[i][3]||parts[i][1],()=>setTimeout(()=>go(i+1),gap))};
+    setTimeout(()=>go(0),60);return;
+  }
   if(mixBusy)return;mixBusy=true;
   const parts=readParts(),sp=[...document.querySelectorAll('#mRead [data-r]')],btn=$('#mPlay');
   const mark=i=>{sp.forEach((s,j)=>s.classList.toggle('on',j===i));$('#mOut').classList.toggle('on',i===parts.length-1)};
@@ -602,9 +624,12 @@ function renderMix(){
   store.set('tl-mix2',mix);return w;
 }
 $('#v-mix').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(!b||b.disabled)return;const k=b.dataset.k;mix[k]=+b.dataset.i;if(k==='f'&&mix.f)mix.t=0;const w=renderMix();
-  const ps=mixParts();if(k==='c')sayPart(ps[0]);else if(k==='v')sayPart(ps[1]);else if(k==='t'&&mix.t)say(MT[mix.t][1]);else if(k==='f'&&mix.f)sayPart(ps[ps.length-1]);else sayMix(w)});
+  const ps=mixParts();if(k==='c')sayPart(ps[0]);else if(k==='v')sayPart(ps[1]);else if(k==='t'&&mix.t){stop();useTTS()?ttsSay(MT[mix.t][1]):say(MT[mix.t][1])}else if(k==='f'&&mix.f)sayPart(ps[ps.length-1]);else{stop();useTTS()?ttsSay(w):sayMix(w)}});
 $('#mPlay').onclick=playMixSeq;
 $('#mRand').onclick=()=>{const r=n=>Math.floor(Math.random()*n);mix.c=r(MC.length);mix.v=r(MV.length);mix.t=Math.random()<.6?0:r(MT.length);mix.f=(mix.t||MV[mix.v][2]===null||Math.random()<.4)?0:1+r(MF.length-1);renderMix();playMixSeq()};
+
+$('#mVoice').onchange=e=>{store.set('tl-voice',e.target.value);stop();ttsSay($('#mOut').textContent)};
+renderVoicePick();if(synth)synth.addEventListener?synth.addEventListener('voiceschanged',renderVoicePick):0;setTimeout(renderVoicePick,1200);
 
 /* ---------- words ---------- */
 const W={
