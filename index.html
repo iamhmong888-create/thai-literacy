@@ -507,6 +507,12 @@ function wavUrl(buf,s,e){const sr=buf.sampleRate,d=buf.getChannelData(0).subarra
   const w=(o,t)=>{for(let i=0;i<t.length;i++)v.setUint8(o+i,t.charCodeAt(i))};w(0,'RIFF');v.setUint32(4,36+n*2,true);w(8,'WAVEfmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*2,true);
   for(let i=0;i<n;i++){const x=Math.max(-1,Math.min(1,d[i]));v.setInt16(44+i*2,x<0?x*32768:x*32767,true)}
   return URL.createObjectURL(new Blob([ab],{type:'audio/wav'}))}
+function voicedSpan(buf){
+  const d=buf.getChannelData(0),f=Math.round(buf.sampleRate*.02),n=Math.floor(d.length/f),e=[];
+  for(let i=0;i<n;i++){let s=0;for(let j=i*f;j<(i+1)*f;j++)s+=d[j]*d[j];e.push(Math.sqrt(s/f))}
+  const th=Math.max(...e)*.08;let a=e.findIndex(x=>x>th),b=n-1;while(b>0&&e[b]<=th)b--;
+  if(a<0)return null;return[Math.max(0,(a-3)*f),Math.min(d.length,(b+4)*f)];
+}
 function splitPoint(buf,mode){
   const d=buf.getChannelData(0),f=Math.round(buf.sampleRate*.02),n=Math.floor(d.length/f),e0=[];
   for(let i=0;i<n;i++){let s=0;for(let j=i*f;j<(i+1)*f;j++)s+=d[j]*d[j];e0.push(Math.sqrt(s/f))}
@@ -534,7 +540,7 @@ function splitPoint(buf,mode){
 function trimmed(key,mode){
   const ck=mode+key;if(trimCache[ck])return Promise.resolve(trimCache[ck]);
   return getRec(key).then(u=>fetch(u)).then(r=>r.arrayBuffer()).then(ab=>{AC=AC||new (window.AudioContext||window.webkitAudioContext)();return new Promise((res,rej)=>AC.decodeAudioData(ab,res,rej))})
-    .then(buf=>{const p=splitPoint(buf,mode);if(!p)throw 0;const pad=p.f*3;
+    .then(buf=>{if(mode==='w'){const s=voicedSpan(buf);if(!s)throw 0;return trimCache[ck]=wavUrl(buf,s[0],s[1])}const p=splitPoint(buf,mode);if(!p)throw 0;const pad=p.f*3;
       const s=mode==='c'?Math.max(0,p.fs*p.f-pad):Math.max(0,p.ge*p.f-p.f);const e=mode==='c'?Math.min(p.n,p.gs*p.f+p.f):Math.min(p.n,(p.le+1)*p.f+pad);
       return trimCache[ck]=wavUrl(buf,s,e)});
 }
@@ -552,14 +558,31 @@ function readParts(){
   else if(mix.f)p.push([base,base],[MF[mix.f]+'อ',cKey(MF[mix.f]),'c',MF[mix.f]+'อ'],[w,w]);
   return p;
 }
-function playMixSeq(){
-  const parts=readParts(),sp=[...document.querySelectorAll('#mRead [data-r]')];
+function partUrl(part){
+  const[,key,mode,short]=part;
+  const synth=k=>Promise.resolve(urlFor(k));
+  if(mode)return REC[key]?trimmed(key,mode).catch(()=>urlFor(short)):synth(short);
+  return REC[key]?trimmed(key,'w').catch(()=>getRec(key)).catch(()=>urlFor(key)):synth(key);
+}
+let mixBusy=false;
+async function playMixSeq(){
+  if(mixBusy)return;mixBusy=true;
+  const parts=readParts(),sp=[...document.querySelectorAll('#mRead [data-r]')],btn=$('#mPlay');
   const mark=i=>{sp.forEach((s,j)=>s.classList.toggle('on',j===i));$('#mOut').classList.toggle('on',i===parts.length-1)};
-  stop();
-  ensureMix(mix.c).then(()=>{
-    const go=i=>{mark(i);if(i>=parts.length){mark(-1);return}speakPart(parts[i],()=>setTimeout(()=>go(i+1),220))};
-    go(0);
-  });
+  stop();const my=token;btn.textContent='กำลังเตรียมเสียง…';btn.disabled=true;
+  try{await ensureMix(mix.c)}catch(e){}
+  const urls=await Promise.all(parts.map(p=>partUrl(p).catch(()=>null)));
+  btn.textContent='ฟังการสะกด';btn.disabled=false;mixBusy=false;
+  if(my!==token)return;
+  const go=i=>{
+    if(my!==token){mark(-1);return}
+    mark(i);if(i>=parts.length){mark(-1);return}
+    const gap=(i===2&&parts.length>3)?550:300;
+    const next=()=>setTimeout(()=>go(i+1),gap);
+    if(urls[i]){onEnd=next;player.src=urls[i];player.playbackRate=+$('#rate').value;const pr=player.play();if(pr&&pr.catch)pr.catch(()=>{if(my===token){onEnd=null;speak(parts[i][3]||parts[i][1],next)}})}
+    else speak(parts[i][3]||parts[i][1],next);
+  };
+  go(0);
 }
 function build(c,v,t,f){
   let tpl=f?v[2]:v[1];
