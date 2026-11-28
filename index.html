@@ -913,11 +913,17 @@ function updScore(){const t=THEMES[themeId];if(!t)return;const ts=t.topics[tTopi
 /* tracing pad */
 let padCtx=null;
 function setupPad(word){
-  const cv=$('#wPad');if(!cv)return;const dpr=window.devicePixelRatio||1;const W=cv.clientWidth,H=cv.clientHeight;cv.width=W*dpr;cv.height=H*dpr;
+  const cv=$('#wPad');if(!cv)return;
+  const r0=cv.getBoundingClientRect();if(r0.width<10){requestAnimationFrame(()=>setupPad(word));return}
+  const dpr=window.devicePixelRatio||1;const W=Math.round(r0.width),H=Math.round(r0.height);cv.width=W*dpr;cv.height=H*dpr;
   const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);padCtx=x;
-  const draw=()=>{x.clearRect(0,0,W,H);x.strokeStyle='#e3e9f7';x.lineWidth=1;[.25,.75].forEach(f=>{x.beginPath();x.moveTo(0,H*f);x.lineTo(W,H*f);x.stroke()});
-    let fs=Math.min(H*.55,W*1.6/Math.max(3,word.length));x.font=`700 ${fs}px K2D, sans-serif`;x.textAlign='center';x.textBaseline='middle';
-    x.fillStyle='#e4e9f6';x.fillText(word,W/2,H*.55);x.setLineDash([3,4]);x.lineWidth=1.5;x.strokeStyle='#8f9cc0';x.strokeText(word,W/2,H*.55);x.setLineDash([]);};
+  const draw=()=>{x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);x.strokeStyle='#e3e9f7';x.lineWidth=1;[.25,.75].forEach(f=>{x.beginPath();x.moveTo(0,H*f);x.lineTo(W,H*f);x.stroke()});
+    let fs=H*.55;x.font=`700 ${fs}px K2D, sans-serif`;let tw=x.measureText(word).width;
+    if(tw>W*.88){fs=fs*W*.88/tw;x.font=`700 ${fs}px K2D, sans-serif`;tw=x.measureText(word).width}
+    x.textAlign='left';x.textBaseline='middle';const tx=Math.max(4,(W-tw)/2),ty=H*.55;
+    x.fillStyle='#e4e9f6';x.fillText(word,tx,ty);x.setLineDash([3,4]);x.lineWidth=1.5;x.strokeStyle='#8f9cc0';x.strokeText(word,tx,ty);x.setLineDash([]);};
+  if(!cv.__ro&&window.ResizeObserver){let lw=W;cv.__ro=new ResizeObserver(()=>{const w=Math.round(cv.getBoundingClientRect().width);if(w>10&&Math.abs(w-lw)>2){lw=w;setupPad(cv.__word)}});cv.__ro.observe(cv)}
+  cv.__word=word;
   (document.fonts&&document.fonts.load?document.fonts.load('700 60px K2D').catch(()=>{}):Promise.resolve()).then(draw);draw();
   let down=false,last=null;
   const pos=e=>{const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]};
