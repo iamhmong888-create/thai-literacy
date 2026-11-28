@@ -198,8 +198,12 @@ button{font:inherit;cursor:pointer;color:inherit}
 .kwlab{margin:12px 0 4px;font-weight:700;color:#0f5c4a;font-size:15px}
 .kmix{border-collapse:separate;border-spacing:0 2px;font-size:clamp(24px,5vw,30px);font-weight:700}
 .kmix td{padding:0 10px;line-height:1.5;white-space:nowrap}
-.kmix td.v{color:#d7263d}.kmix td.eq{padding-left:26px}
+.kmix td.v,.kmix .tk span.v{color:#d7263d}.kmix .tk span{margin-right:.55em}.kmix .tk span:last-child{margin-right:0}.kmix td.eq{padding-left:26px}
 .kmix tr.on td{background:#fff1c2}.kmix tr.on td:first-child{border-radius:10px 0 0 10px}.kmix tr.on td:last-child{border-radius:0 10px 10px 0}
+.picks{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.pkh{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.pkpic{width:120px;height:100px;border-radius:12px;overflow:hidden;background:#f2f5ff;display:grid;place-items:center;border:1px solid var(--line)}.pkpic img{width:100%;height:100%;object-fit:contain}.pkpic.ico img{width:60%;height:60%}
+.pkpic.nopic{font-size:40px;color:#9aa7c7;font-weight:700}
 .pad{margin-top:12px;border:2px dashed #c9d2e8;border-radius:16px;background:#fff;overflow:hidden}
 #wPad{display:block;width:100%;height:clamp(160px,30vw,240px);touch-action:none;cursor:crosshair}
 .match{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
@@ -251,6 +255,15 @@ footer{border-top:1px solid var(--line);color:var(--muted);font-size:15px;text-a
 .tabbar b{font-weight:700}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]) .lesson,:root:not([data-theme=light]) .prow,:root:not([data-theme=light]) .tabbar{background:#16203f;color:#f2f4fa}:root:not([data-theme=light]) .tabbar a{color:#f2f4fa}}
 :root[data-theme=dark] .lesson,:root[data-theme=dark] .prow,:root[data-theme=dark] .tabbar{background:#16203f;color:#f2f4fa}:root[data-theme=dark] .tabbar a{color:#f2f4fa}
+
+/* กรอบแดงเมื่อเมาส์ชี้ */
+.book .cv{transition:transform .2s,box-shadow .2s}
+@media (hover:hover){
+.book:hover .cv{transform:translateY(-4px);box-shadow:0 0 0 4px var(--red),0 10px 20px rgba(20,24,58,.28)}
+.book:hover b,.book:hover span{color:var(--red)}
+.lesson:hover{border-color:var(--red);box-shadow:0 0 0 2px var(--red)}
+.ttopic:hover{border-color:var(--red)}
+}
 </style>
 </head>
 <body>
@@ -846,9 +859,12 @@ $('#progReset').onclick=()=>{
 $('#back').onclick=()=>{if(view==='quiz'&&inQuiz()){quizHome();return}location.hash='#'+(PARENT[view]||'home')};
 
 /* ---------- แบบเรียน 12 สภาพ: theme lessons (from the book) ---------- */
+const thLoaded={};
+function loadThemeAudio(id){if(id==='s1'||thLoaded[id])return;thLoaded[id]=1;const sc=document.createElement('script');sc.src='data/'+id+'.js';
+  sc.onload=()=>{const d=window.__th&&window.__th[id];if(d)Object.assign(AUD,d);if(view==='theme'&&themeId===id)renderTheme(id)};sc.onerror=()=>{delete thLoaded[id]};document.head.appendChild(sc)}
 function sayTH(text,onend){stop();if(REC[text]||!useTTS())speak(text,onend);else ttsSay(text,onend)}
 function speakTH(text,onend){if(REC[text]||!useTTS())speak(text,onend);else ttsSay(text,onend)}
-const picSrc=k=>k.startsWith('s1/')||/^s\d+\//.test(k)?'img/'+k+'.jpg':'img/'+k+'.svg';
+const picSrc=k=>(window.__img&&window.__img[k])||(k.startsWith('s1/')||/^s\d+\//.test(k)?'img/'+k+'.jpg':'img/'+k+'.svg');
 const picHTML=(k,cls)=>`<span class="${cls||'tpic'}${/^s\d+\//.test(k)?'':' ico'}"><img src="${esc(picSrc(k))}" alt="" loading="lazy"></span>`;
 let tTopic=0,tTab='words',tWrite=0,tMatchSel=null,tDone={},tScoreN={ok:0,n:0};
 function renderTheme(id){
@@ -864,7 +880,7 @@ function renderTheme(id){
       <div class="kwtop">${picHTML(x.img,'kwpic')}<div><h4 class="kwh">${esc(x.w)}</h4><p class="kwr">อ่านว่า <b>${esc(x.read)}</b></p>
       <div class="row"><button class="btn sun" data-sayw="${i}">ฟังคำ</button><button class="btn alt" data-spell="${i}">ฟังการประสมคำ</button></div></div></div>
       <p class="kwlab">การประสมคำ</p>
-      <table class="kmix"><tbody>${x.rows.map((r,j)=>`<tr data-r="${j}"><td>${esc(r[0])}</td><td class="v">${esc(r[1])}</td><td>${esc(r[2])}</td><td class="eq">${esc(r[3])}</td></tr>`).join('')}</tbody></table></div>`).join('')}</div>`;
+      <table class="kmix"><tbody>${x.rows.map((r,j)=>`<tr data-r="${j}">${rowCells(r)}</tr>`).join('')}</tbody></table></div>`).join('')}</div>`;
   }else if(tTab==='write'){
     if(tWrite>=tp.write.length)tWrite=0;const wr=tp.write[tWrite];
     html+=`<p class="lead">ฝึกอ่าน แล้วใช้นิ้วหรือเมาส์ลากตามเส้นประเพื่อฝึกเขียน</p>
@@ -878,6 +894,10 @@ function renderTheme(id){
       const words=ts.pairs.map(p=>p[1]),order=tShuffle(id+tTopic,words.length);
       html+=`<div class="match"><div class="mcol">${ts.pairs.map((p,i)=>`<button class="mp${tDone['m'+i]?' ok':''}" data-mp="${i}">${picHTML(p[0],'mpic')}</button>`).join('')}</div>
       <div class="mcol">${order.map(i=>`<button class="mw${tDone['m'+i]?' ok':''}" data-mw="${i}">${esc(words[i])}</button>`).join('')}</div></div>`;
+    }else if(ts.type==='pick'){
+      const words=ts.items.map(x=>x[1]);
+      html+=`<div class="picks">${ts.items.map(([im,w],i)=>{const o=tShuffle('p'+themeId+tTopic+i,words.length).filter(j=>j!==i&&!(im&&ts.items[j][0]===im)&&words[j]!==w).slice(0,2).concat([i]);while(o.length<3)o.unshift(i);const opts=tShuffle('q'+i,3).map(j=>words[o[j]]);const done=tDone['p'+i];
+        return `<div class="tq pk" data-pi="${i}"><div class="pkh">${im?picHTML(im,'pkpic'):'<span class="pkpic nopic">?</span>'}<button class="ib2" data-pksay="${i}" aria-label="ฟังเสียง">🔊</button></div><div class="ops">${opts.map(o=>`<button class="op${done!=null&&o===w?' right':''}" data-po="${esc(o)}">${esc(o)}</button>`).join('')}</div><p class="fb"></p></div>`}).join('')}</div>`;
     }else{
       html+=ts.items.map(([q,a],i)=>{const opts=tFillOpts(ts,i);return `<div class="tq" data-fi="${i}"><p>${i+1}. <span class="fq">${esc(tDone['f'+i]!=null?a:q)}</span></p><div class="ops">${opts.map(o=>`<button class="op${tDone['f'+i]!=null&&o===a?' right':''}" data-fo="${esc(o)}">${esc(o)}</button>`).join('')}</div><p class="fb"></p></div>`}).join('');
     }
@@ -907,7 +927,14 @@ function setupPad(word){
   cv.__redraw=draw;
 }
 const TONE_N={'่':'ไม้เอก','้':'ไม้โท','๊':'ไม้ตรี','๋':'ไม้จัตวา'};
+const isTone=s=>TONE_N[s.replace(/-/g,'')]!=null;
+function rowCells(r){
+  if(Array.isArray(r))return `<td>${esc(r[0])}</td><td class="v">${esc(r[1])}</td><td>${esc(r[2])}</td><td class="eq">${esc(r[3])}</td>`;
+  const tk=(r.t||[]).map(s=>`<span class="${s.includes('-')&&!isTone(s)?'v':''}">${esc(s)}</span>`).join('');
+  return `<td class="tk" colspan="3">${tk||'&nbsp;'}</td><td class="eq">${esc(r.r)}</td>`;
+}
 function rowSpell(r){
+  if(!Array.isArray(r)){const o=(r.t||[]).map(s=>isTone(s)?TONE_N[s.replace(/-/g,'')]:s.includes('-')?s.replace(/-/g,'อ'):s+'อ');o.push(r.r);return o}
   const out=[];
   r[0].split(/\s+/).filter(Boolean).forEach(c=>out.push(c+'อ'));
   if(r[1])out.push(r[1].replace(/-/g,'อ'));
@@ -941,6 +968,11 @@ $('#themeBody').addEventListener('click',e=>{
       if(tp.test.pairs.every((p,k)=>tDone['m'+k]))setTimeout(()=>toastMsg('เก่งมาก จับคู่ถูกครบทุกข้อ'),300)}
     else{b.classList.add('bad');setTimeout(()=>b.classList.remove('bad'),600);stop();speakTH('ยังไม่ถูก ลองใหม่')}
     return}
+  if(d.pksay!=null){sayTH(tp.test.items[+d.pksay][1]);return}
+  if(d.po!=null){const card=b.closest('.tq'),i=+card.dataset.pi;if(tDone['p'+i]!=null)return;const a=tp.test.items[i][1],ok=d.po===a;tDone['p'+i]=ok;
+    card.querySelectorAll('.op').forEach(x=>{if(x.dataset.po===a)x.classList.add('right')});if(!ok)b.classList.add('wrong');
+    const fb=card.querySelector('.fb');fb.textContent=ok?'ถูกต้อง เก่งมาก':'ยังไม่ถูก คำที่ถูกคือ '+a;fb.style.color=ok?'var(--ok)':'var(--red)';
+    if(ok)sayTH(a);else{stop();speakTH('ยังไม่ถูก คำที่ถูกคือ',()=>speakTH(a))}updScore();return}
   if(d.fo!=null){const card=b.closest('.tq'),i=+card.dataset.fi;if(tDone['f'+i]!=null)return;const a=tp.test.items[i][1],ok=d.fo===a;tDone['f'+i]=ok;
     card.querySelectorAll('.op').forEach(x=>{if(x.dataset.fo===a)x.classList.add('right')});if(!ok)b.classList.add('wrong');
     card.querySelector('.fq').textContent=a;const fb=card.querySelector('.fb');fb.textContent=ok?'ถูกต้อง เก่งมาก':'ยังไม่ถูก คำที่ถูกคือ '+a;fb.style.color=ok?'var(--ok)':'var(--red)';
@@ -958,7 +990,7 @@ function route(){
   views.forEach(v=>{$('#v-'+v).hidden=v!==view});
   $('#abTitle').textContent=view==='theme'?'สภาพที่ '+THEMES[themeId].no+' '+THEMES[themeId].title:(TITLES[view]||'รู้หนังสือไทย');$('#back').setAttribute('aria-label',PARENT[view]?'กลับไปเล่มรู้จักภาษาไทยเบื้องต้น':'กลับหน้าแรก');$('#back').hidden=view==='home';
   if(!['home','basics','library','progress','theme'].includes(view)&&!visited.has(view)){visited.add(view);try{localStorage.setItem('tl-visited',JSON.stringify([...visited]))}catch(e){}}
-  if(view==='quiz')quizHome();if(view==='theme')renderTheme(themeId);if(view==='home')renderHome();if(view==='basics')renderBasics();if(view==='progress')renderProgress();
+  if(view==='quiz')quizHome();if(view==='theme'){loadThemeAudio(themeId);if(themeId!==window.__lastTheme){tTopic=0;tTab='words';tDone={};tWrite=0;window.__lastTheme=themeId}renderTheme(themeId)}if(view==='home')renderHome();if(view==='basics')renderBasics();if(view==='progress')renderProgress();
   const tab=['progress','quiz'].includes(view)?view:'home';document.querySelectorAll('#nav a').forEach(a=>{if(a.getAttribute('href')==='#'+tab)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   stop();window.scrollTo(0,0);
 }
