@@ -264,6 +264,7 @@ footer{border-top:1px solid var(--line);color:var(--muted);font-size:15px;text-a
 .lesson:hover{border-color:var(--red);box-shadow:0 0 0 2px var(--red)}
 .ttopic:hover{border-color:var(--red)}
 }
+#themeBody .ttabs{scroll-margin-top:calc(var(--abh,72px) + 8px)}
 </style>
 </head>
 <body>
@@ -958,7 +959,7 @@ function playSpell(x,card){
 $('#themeBody').addEventListener('click',e=>{
   const t=THEMES[themeId];if(!t||!t.topics)return;const tp=t.topics[tTopic];
   const b=e.target.closest('button');if(!b)return;const d=b.dataset;
-  if(d.topic!=null){tTopic=+d.topic;tDone={};tMatchSel=null;tWrite=0;renderTheme(themeId);return}
+  if(d.topic!=null){tTopic=+d.topic;tDone={};tMatchSel=null;tWrite=0;renderTheme(themeId);const tb=document.querySelector('#themeBody .ttabs');if(tb)requestAnimationFrame(()=>tb.scrollIntoView({behavior:'smooth',block:'start'}));return}
   if(d.tab){tTab=d.tab;tDone={};tMatchSel=null;renderTheme(themeId);return}
   if(d.sayw!=null){sayTH(tp.words[+d.sayw].w);return}
   if(d.spell!=null){playSpell(tp.words[+d.spell],b.closest('.kw'));return}
